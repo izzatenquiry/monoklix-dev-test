@@ -409,6 +409,7 @@ const App: React.FC = () => {
           return <SettingsView 
                     {...commonProps}
                     currentUser={currentUser!} 
+                    tempApiKey={tempApiKey}
                     onUserUpdate={handleUserUpdate} 
                     aiSupportMessages={aiSupportMessages}
                     isAiSupportLoading={isAiSupportLoading}

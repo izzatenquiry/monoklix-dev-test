@@ -35,6 +35,7 @@ interface Message {
 
 interface SettingsViewProps {
   currentUser: User;
+  tempApiKey: string | null;
   onUserUpdate: (user: User) => void;
   aiSupportMessages: Message[];
   isAiSupportLoading: boolean;
@@ -254,7 +255,14 @@ const CacheManagerPanel: React.FC = () => {
   );
 };
 
-const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: User) => void, language: Language }> = ({ currentUser, onUserUpdate, language }) => {
+interface ApiIntegrationsPanelProps {
+  currentUser: User;
+  activeApiKey: string | null;
+  onUserUpdate: (user: User) => void;
+  language: Language;
+}
+
+const ApiIntegrationsPanel: React.FC<ApiIntegrationsPanelProps> = ({ currentUser, activeApiKey, onUserUpdate, language }) => {
     const [apiKey, setApiKey] = useState('');
     const [isKeyVisible, setIsKeyVisible] = useState(false);
     const [apiKeyStatus, setApiKeyStatus] = useState<{ type: 'idle' | 'success' | 'error' | 'loading'; message: string }>({ type: 'idle', message: '' });
@@ -311,7 +319,7 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
         try {
             const veo3AuthToken = sessionStorage.getItem('veoAuthToken') || undefined;
             const results = await runApiHealthCheck({
-                textKey: currentUser.apiKey || undefined,
+                textKey: activeApiKey || undefined,
                 veo3AuthToken
             });
             setHealthCheckResults(results);
@@ -438,7 +446,6 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
                 </div>
             </div>
             <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-sm">
-                {/* FIX: Removed unsupported `onUserUpdate` prop from `ApiKeyClaimPanel`. */}
                 <ApiKeyClaimPanel currentUser={currentUser} language={language} />
             </div>
         </div>
@@ -475,7 +482,7 @@ const AiSupportPanel: React.FC<{
 
 const SettingsView: React.FC<SettingsViewProps> = (props) => {
     const [activeTab, setActiveTab] = useState<SettingsTabId>('profile');
-    const { currentUser, language } = props;
+    const { currentUser, tempApiKey, language } = props;
 
     const renderActiveTabContent = () => {
         switch (activeTab) {
@@ -486,7 +493,14 @@ const SettingsView: React.FC<SettingsViewProps> = (props) => {
                         <CacheManagerPanel />
                     </div>
                 );
-            case 'api': return <ApiIntegrationsPanel currentUser={currentUser} onUserUpdate={props.onUserUpdate} language={language} />;
+            case 'api': 
+                const activeApiKey = currentUser.apiKey || tempApiKey;
+                return <ApiIntegrationsPanel 
+                            currentUser={currentUser} 
+                            activeApiKey={activeApiKey} 
+                            onUserUpdate={props.onUserUpdate} 
+                            language={language} 
+                        />;
             case 'ai-support': return <AiSupportPanel 
                 messages={props.aiSupportMessages}
                 isLoading={props.isAiSupportLoading}
