@@ -24,7 +24,6 @@ import AiPromptLibrarySuiteView from './components/views/AiPromptLibrarySuiteVie
 import SocialPostStudioView from './components/views/SocialPostStudioView';
 import eventBus from './services/eventBus';
 import ApiKeyModal from './components/ApiKeyModal';
-import CacheManagerView from './components/views/CacheManagerView';
 
 
 interface VideoGenPreset {
@@ -423,8 +422,6 @@ const App: React.FC = () => {
                     // FIX: Changed `onAiSupportSend` to `handleAiSupportSend` to pass the correct function prop.
                     onAiSupportSend={handleAiSupportSend}
                  />;
-      case 'cache-manager':
-          return <CacheManagerView />;
       default:
         return <ECourseView {...commonProps}/>;
     }

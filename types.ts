@@ -18,8 +18,7 @@ export type View =
   | 'gallery'
   // Settings & Admin
   | 'settings'
-  | 'api-generator'
-  | 'cache-manager';
+  | 'api-generator';
 
 export interface NavItem {
   id: View | 'logout';

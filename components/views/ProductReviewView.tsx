@@ -164,15 +164,24 @@ const ProductReviewView: React.FC<ProductReviewViewProps> = ({ onReEdit, onCreat
     parsedScenes, style, camera, composition, lensType, filmSim, creativityLevel
   ]);
 
+  // FIX: This effect was incorrectly revoking blob URLs every time a new video was added.
+  // It's now corrected to only run on component unmount, ensuring all video URLs remain valid
+  // throughout the component's lifecycle.
+  const generatedVideosRef = useRef(generatedVideos);
+  generatedVideosRef.current = generatedVideos;
+
   useEffect(() => {
+    // Return a cleanup function that will run ONLY when the component unmounts.
     return () => {
-        generatedVideos.forEach(url => {
-            if (url && url.startsWith('blob:')) {
-                URL.revokeObjectURL(url);
-            }
-        });
+      // Access the ref to get the final list of URLs to revoke.
+      generatedVideosRef.current.forEach(url => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
-  }, [generatedVideos]);
+  }, []); // The empty dependency array is crucial.
+
 
   const handleProductImageUpload = useCallback((base64: string, mimeType: string) => {
     setProductImage({ base64, mimeType });
