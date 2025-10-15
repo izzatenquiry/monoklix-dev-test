@@ -108,7 +108,7 @@ export const translations = {
         sub1_2_option2_p1: 'If you don\'t have your own key or if your key is having issues (e.g., quota exceeded), you can claim a temporary key provided by the platform.',
         sub1_2_option2_ol: [
             'This option usually appears automatically in a pop-up modal when an API error occurs.',
-            'You can also access it manually by going to **Settings > API & Integrations** and finding the "Request a New API Key" panel.',
+            'You can also access it manually by going to **Settings > API & Integrations** and finding the "API Key Generator" panel.',
             'Click **Request Available Keys** to see a list of temporary keys.',
             'Click **Claim** on any available key. It will be automatically applied to your account.',
             '**Note:** These keys are shared and have a daily claim limit for non-admin users. They are intended for temporary use.'
@@ -693,7 +693,7 @@ export const translations = {
     apiGeneratorView: {
         title: 'API Key Generator',
         subtitle: 'For admin use only. Generate temporary Gemini API keys for users.',
-        requestNewKey: 'Request a New API Key',
+        requestNewKey: 'API Key Generator',
         description: 'This free API is for Text, Image Generation, and Image Edit only.',
         requestButton: 'Request Available Keys',
         fetchError: 'Failed to fetch keys: {error}',
@@ -703,6 +703,11 @@ export const translations = {
         noActiveKeys: 'No new, active keys are available at the moment. Please try again later.',
         successMessage: 'Key successfully applied to your account and copied to clipboard!',
         availableKeysTitle: 'Available Keys',
+        modalSubtitle: 'If your current key has expired or is not working, you can get a new one here.',
+        autoSelectButton: 'Find & Apply New Key',
+        showListButton: 'Show Available Keys',
+        autoSelectSuccess: 'Success! A new healthy API key has been applied.',
+        autoSelectFailed: 'Auto-selection failed. No healthy keys found. Please try showing the list manually.',
     },
 
     eCourseView: {
@@ -1463,6 +1468,11 @@ export const translations = {
         noActiveKeys: 'Tiada kunci baru yang aktif tersedia pada masa ini. Sila cuba lagi nanti.',
         successMessage: 'Kunci berjaya digunakan pada akaun anda dan disalin ke papan keratan!',
         availableKeysTitle: 'Kunci Tersedia',
+        modalSubtitle: 'Jika kunci semasa anda telah tamat tempoh atau tidak berfungsi, anda boleh dapatkan yang baru di sini.',
+        autoSelectButton: 'Auto-Pilih & Guna Kunci',
+        showListButton: 'Tunjuk Kunci Tersedia',
+        autoSelectSuccess: 'Berjaya! Kunci API baru yang sihat telah digunakan.',
+        autoSelectFailed: 'Pemilihan-auto gagal. Tiada kunci sihat ditemui. Sila cuba tunjukkan senarai secara manual.',
     },
 
     eCourseView: {

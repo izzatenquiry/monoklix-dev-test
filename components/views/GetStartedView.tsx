@@ -69,7 +69,7 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                                 <h5 className="font-bold">{T.chapter1.sub1_2_option2_title}</h5>
                                 <p className="text-xs mt-1">{T.chapter1.sub1_2_option2_p1}</p>
                                 <ol className="list-decimal pl-5 space-y-1 mt-3">
-                                    {T.chapter1.sub1_2_option2_ol.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/Settings > API & Integrations/g, '<strong class="font-semibold">Settings > API & Integrations</strong>').replace(/Request a New API Key/g, '<strong class="font-semibold">Request a New API Key</strong>') }}/>)}
+                                    {T.chapter1.sub1_2_option2_ol.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/Settings > API & Integrations/g, '<strong class="font-semibold">Settings > API & Integrations</strong>').replace(/API Key Generator/g, '<strong class="font-semibold">API Key Generator</strong>') }}/>)}
                                 </ol>
                             </div>
                         </div>

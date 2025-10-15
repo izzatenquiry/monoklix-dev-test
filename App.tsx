@@ -287,6 +287,19 @@ const App: React.FC = () => {
     };
   }, [currentUser, findAndSetSharedKey]);
 
+  // Effect for manual API key refresh from the claim panel
+  useEffect(() => {
+    const handleManualRefresh = async () => {
+      const success = await findAndSetSharedKey();
+      eventBus.dispatch('manualApiKeyRefreshComplete', { success });
+    };
+    
+    eventBus.on('manualApiKeyRefresh', handleManualRefresh);
+    return () => {
+      eventBus.remove('manualApiKeyRefresh', handleManualRefresh);
+    };
+  }, [findAndSetSharedKey]);
+
 
   const handleLoginSuccess = (user: User) => {
     handleUserUpdate(user);

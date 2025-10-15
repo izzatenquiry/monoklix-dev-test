@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { type Language, type User } from '../../types';
 import { getTranslations } from '../../services/translations';
 import {
-    KeyIcon, CheckCircleIcon, XIcon, AlertTriangleIcon
+    KeyIcon, CheckCircleIcon, XIcon, AlertTriangleIcon, SparklesIcon
 } from '../Icons';
 import Spinner from './Spinner';
 import { getAvailableApiKeys, claimApiKey, type AvailableApiKey } from '../../services/userService';
@@ -32,6 +32,22 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
     const [copiedKeyId, setCopiedKeyId] = useState<number | null>(null);
     const [healthCheckResults, setHealthCheckResults] = useState<Map<number, HealthCheckResult[] | null>>(new Map());
     const [checkingKeyId, setCheckingKeyId] = useState<number | null>(null);
+    const [autoSelectStatus, setAutoSelectStatus] = useState<'idle' | 'loading' | 'success' | 'failed'>('idle');
+
+    useEffect(() => {
+        const handleRefreshComplete = ({ success }: { success: boolean }) => {
+            setAutoSelectStatus(success ? 'success' : 'failed');
+            if (success && onClaimSuccess) {
+                onClaimSuccess();
+            }
+            setTimeout(() => setAutoSelectStatus('idle'), 4000); // Reset after 4 seconds
+        };
+
+        eventBus.on('manualApiKeyRefreshComplete', handleRefreshComplete);
+        return () => {
+            eventBus.remove('manualApiKeyRefreshComplete', handleRefreshComplete);
+        };
+    }, [onClaimSuccess]);
 
     const handleFetchKeys = async () => {
         setIsLoading(true);
@@ -85,7 +101,6 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
         setCheckingKeyId(key.id);
         setHealthCheckResults(prev => new Map(prev).set(key.id, null));
         try {
-            // FIX: The `runApiHealthCheck` function expects an object with a `textKey` property, not a plain string.
             const results = await runApiHealthCheck({ textKey: key.apiKey });
             setHealthCheckResults(prev => new Map(prev).set(key.id, results));
         } catch (error: any) {
@@ -96,6 +111,14 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
         }
     };
     
+    const handleAutoSelect = () => {
+        setAutoSelectStatus('loading');
+        setError(null);
+        setStatusMessage(null);
+        setAvailableKeys([]); // Clear the list view
+        eventBus.dispatch('manualApiKeyRefresh');
+    };
+
     const getStatusUi = (status?: HealthCheckResult['status']) => {
         switch (status) {
             case 'operational': return { icon: <CheckCircleIcon className="w-4 h-4 text-green-500"/>, text: 'text-green-700 dark:text-green-300' };
@@ -111,18 +134,31 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
                 <KeyIcon className="w-12 h-12 text-primary-500 mb-3"/>
                 <h2 className="text-xl font-bold">{T.requestNewKey}</h2>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2 max-w-md">
-                    {T.description}
+                    {T.modalSubtitle}
                 </p>
-                <button 
-                    onClick={handleFetchKeys} 
-                    disabled={isLoading}
-                    className="mt-6 bg-primary-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                >
-                    {isLoading && availableKeys.length === 0 ? <Spinner/> : T.requestButton}
-                </button>
+                
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button 
+                        onClick={handleAutoSelect} 
+                        disabled={isLoading || autoSelectStatus === 'loading'}
+                        className="w-60 flex items-center justify-center gap-2 bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                    >
+                        {autoSelectStatus === 'loading' ? <Spinner/> : <SparklesIcon className="w-5 h-5"/>}
+                        {T.autoSelectButton}
+                    </button>
+                     <button 
+                        onClick={handleFetchKeys} 
+                        disabled={isLoading || autoSelectStatus === 'loading'}
+                        className="w-60 flex items-center justify-center gap-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-semibold py-3 px-6 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors disabled:opacity-50"
+                    >
+                        {isLoading && availableKeys.length === 0 ? <Spinner/> : T.showListButton}
+                    </button>
+                </div>
 
                 {error && <p className="mt-4 text-red-500 text-sm">{error}</p>}
                 {statusMessage && <p className="mt-4 text-green-600 text-sm">{statusMessage}</p>}
+                {autoSelectStatus === 'success' && <p className="mt-4 text-green-600 text-sm">{T.autoSelectSuccess}</p>}
+                {autoSelectStatus === 'failed' && <p className="mt-4 text-red-500 text-sm">{T.autoSelectFailed}</p>}
             </div>
 
             {availableKeys.length > 0 && !isLoading && (
