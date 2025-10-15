@@ -12,6 +12,7 @@ import { getSupportPrompt } from '../../services/promptManager';
 import { runApiHealthCheck, type HealthCheckResult } from '../../services/geminiService';
 import { getTranslations } from '../../services/translations';
 import ApiKeyClaimPanel from '../common/ApiKeyClaimPanel';
+import { VEO_3_AUTH_TOKEN } from '../../services/aiConfig';
 
 // Define the types for the tabs in the settings view
 type SettingsTabId = 'profile' | 'api' | 'ai-support' | 'content-admin' | 'user-db';
@@ -131,21 +132,12 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
     const [isCheckingHealth, setIsCheckingHealth] = useState(false);
     const [healthCheckResults, setHealthCheckResults] = useState<HealthCheckResult[] | null>(null);
     
-    const [authToken, setAuthToken] = useState('');
-    const [isTokenVisible, setIsTokenVisible] = useState(false);
-
     useEffect(() => {
         const savedToken = sessionStorage.getItem('veoAuthToken');
-        if (savedToken) {
-            setAuthToken(savedToken);
+        if (!savedToken) {
+            sessionStorage.setItem('veoAuthToken', VEO_3_AUTH_TOKEN);
         }
     }, []);
-
-    const handleAuthTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const token = e.target.value;
-        setAuthToken(token);
-        sessionStorage.setItem('veoAuthToken', token);
-    };
 
     const handleSaveApiKey = async () => {
         setApiKeyStatus({ type: 'loading', message: 'Saving API Key...' });
@@ -249,18 +241,11 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
                             <li>Go to `Application` &gt; `Storage` &gt; `Cookies`.</li>
                             <li>Find the cookie named `__SESSION` and copy its entire "Cookie Value".</li>
                         </ol>
-                        <div className="relative">
-                            <input
-                                id="authToken"
-                                type={isTokenVisible ? 'text' : 'password'}
-                                value={authToken || ''}
-                                onChange={handleAuthTokenChange}
-                                placeholder="Paste your __SESSION token value here"
-                                className="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg p-3 pr-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-                            />
-                             <button type="button" onClick={() => setIsTokenVisible(!isTokenVisible)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-500 hover:text-neutral-700" aria-label={isTokenVisible ? 'Hide' : 'Show'}>
-                                {isTokenVisible ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                            </button>
+                        <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-2 border border-green-200 dark:border-green-800">
+                            <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+                                Authorization Token is configured and ready.
+                            </p>
                         </div>
                     </div>
                 </div>
