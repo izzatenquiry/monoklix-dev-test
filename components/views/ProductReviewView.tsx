@@ -98,6 +98,7 @@ const ProductReviewView: React.FC<ProductReviewViewProps> = ({ onReEdit, onCreat
   const [isGeneratingVideos, setIsGeneratingVideos] = useState(false);
   const [videoGenerationStatus, setVideoGenerationStatus] = useState<('idle' | 'loading' | 'success' | 'error')[]>(Array(4).fill('idle'));
   const [generatedVideos, setGeneratedVideos] = useState<(string | null)[]>(Array(4).fill(null));
+  const [generatedThumbnails, setGeneratedThumbnails] = useState<(string | null)[]>(Array(4).fill(null));
   const [videoFilenames, setVideoFilenames] = useState<(string | null)[]>(Array(4).fill(null));
   const [videoGenerationErrors, setVideoGenerationErrors] = useState<(string | null)[]>(Array(4).fill(null));
   const isVideoCancelledRef = useRef(false);
@@ -203,6 +204,7 @@ const ProductReviewView: React.FC<ProductReviewViewProps> = ({ onReEdit, onCreat
     setGeneratedImages(Array(4).fill(null));
     setImageGenerationErrors(Array(4).fill(null));
     setGeneratedVideos(Array(4).fill(null));
+    setGeneratedThumbnails(Array(4).fill(null));
     setVideoFilenames(Array(4).fill(null));
     setVideoGenerationStatus(Array(4).fill('idle'));
     setVideoGenerationErrors(Array(4).fill(null));
@@ -414,7 +416,7 @@ const runVideoGeneration = async (index: number) => {
       const videoPrompt = `Generate a video based on the following scene description. The entire video's context, setting, and any spoken language must be strictly in ${selectedLanguage}. Scene: ${sceneDescription}`;
       const tokenToUse = authToken || sessionStorage.getItem('veoAuthToken') || '';
       
-      const videoFile = await generateVideo(
+      const { videoFile, thumbnailUrl } = await generateVideo(
         videoPrompt,
         videoModel,
         videoAspectRatio,
@@ -442,6 +444,12 @@ const runVideoGeneration = async (index: number) => {
         }
         next[index] = url;
         return next;
+      });
+
+      setGeneratedThumbnails(prev => {
+          const next = [...prev];
+          next[index] = thumbnailUrl;
+          return next;
       });
       
       setVideoFilenames(prev => {
@@ -485,6 +493,7 @@ const runVideoGeneration = async (index: number) => {
     isVideoCancelledRef.current = false;
     setVideoGenerationStatus(Array(parsedScenes.length).fill('idle'));
     setGeneratedVideos(Array(parsedScenes.length).fill(null));
+    setGeneratedThumbnails(Array(parsedScenes.length).fill(null));
     setVideoFilenames(Array(parsedScenes.length).fill(null));
     setVideoGenerationErrors(Array(parsedScenes.length).fill(null));
 
@@ -536,6 +545,7 @@ const runVideoGeneration = async (index: number) => {
     setGeneratedImages(Array(4).fill(null));
     setImageGenerationErrors(Array(4).fill(null));
     setGeneratedVideos(Array(4).fill(null));
+    setGeneratedThumbnails(Array(4).fill(null));
     setVideoFilenames(Array(4).fill(null));
     setVideoGenerationStatus(Array(4).fill('idle'));
     setVideoGenerationErrors(Array(4).fill(null));
@@ -854,7 +864,8 @@ const runVideoGeneration = async (index: number) => {
                                     <>
                                         <video 
                                             key={generatedVideos[index]!}
-                                            src={generatedVideos[index]!} 
+                                            src={generatedVideos[index]!}
+                                            poster={generatedThumbnails[index] || undefined}
                                             controls 
                                             className="w-full h-full object-cover"
                                             preload="metadata"

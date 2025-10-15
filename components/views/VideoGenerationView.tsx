@@ -51,6 +51,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
   
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoFilename, setVideoFilename] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
@@ -174,6 +175,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
       setError(null);
       setVideoUrl(null);
       setVideoFilename(null);
+      setThumbnailUrl(null);
 
       const promptParts = [
         subjectContext,
@@ -208,7 +210,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
       try {
           const image = referenceImage ? { imageBytes: referenceImage.base64, mimeType: referenceImage.mimeType } : undefined;
           
-          const videoFile = await generateVideo(fullPrompt, model, aspectRatio, resolution, negativePrompt, image, savedAuthToken);
+          const { videoFile, thumbnailUrl: newThumbnailUrl } = await generateVideo(fullPrompt, model, aspectRatio, resolution, negativePrompt, image, savedAuthToken);
           
           if (!((videoFile as unknown) instanceof Blob)) {
             throw new Error('generateVideo did not return a valid File/Blob object');
@@ -220,6 +222,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
           
           setVideoUrl(blobUrl);
           setVideoFilename(videoFile.name);
+          setThumbnailUrl(newThumbnailUrl);
           
           await addHistoryItem({
               type: 'Video',
@@ -255,6 +258,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
     
     setVideoUrl(null);
     setVideoFilename(null);
+    setThumbnailUrl(null);
     setError(null);
     setReferenceImage(null);
     setPreviewUrl(null);
@@ -392,7 +396,8 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
               <div className="w-full h-full flex flex-col items-center justify-center gap-4">
                   <video 
                       key={videoUrl}
-                      src={videoUrl} 
+                      src={videoUrl}
+                      poster={thumbnailUrl || undefined}
                       controls 
                       autoPlay 
                       playsInline

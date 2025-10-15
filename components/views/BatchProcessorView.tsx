@@ -148,8 +148,8 @@ const BatchProcessorView: React.FC<BatchProcessorViewProps> = ({ language, prese
         try {
             const imagePayload = item.image ? { imageBytes: item.image.base64, mimeType: item.image.mimeType } : undefined;
             // FIX: Pass the authToken as the 7th argument to generateVideo to fix the error.
-            const result = await generateVideo(prompt, model, aspectRatio, resolution, "", imagePayload, authToken);
-            await addHistoryItem({ type: 'Video', prompt: `Batch: ${prompt}`, result });
+            const { videoFile } = await generateVideo(prompt, model, aspectRatio, resolution, "", imagePayload, authToken);
+            await addHistoryItem({ type: 'Video', prompt: `Batch: ${prompt}`, result: videoFile });
             addLog(T.videoSuccess.replace('{prompt}', prompt), 'success');
             setProgress(p => ({ ...p, completed: p.completed + 1 }));
         } catch (e) {

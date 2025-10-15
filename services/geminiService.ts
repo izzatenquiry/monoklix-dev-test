@@ -174,7 +174,7 @@ export const generateImages = async (
  * @param {string} negativePrompt - A negative prompt.
  * @param {{ imageBytes: string; mimeType: string }} [image] - Optional image data.
  * @param {string} authToken - The Bearer token for Veo3 API authentication.
- * @returns {Promise<File>} The file object of the generated video, which includes the filename.
+ * @returns {Promise<{ videoFile: File; thumbnailUrl: string | null; }>} The file object of the generated video and an optional thumbnail URL.
  */
 export const generateVideo = async (
     prompt: string,
@@ -184,7 +184,7 @@ export const generateVideo = async (
     negativePrompt: string, // Not directly used by Veo 2.0 SDK call
     image: { imageBytes: string, mimeType: string } | undefined,
     authToken: string
-): Promise<File> => {
+): Promise<{ videoFile: File; thumbnailUrl: string | null; }> => {
 
     let processedImage = image;
 
@@ -237,6 +237,7 @@ export const generateVideo = async (
 
             let finalOperations: any[] = initialOperations;
             let finalUrl: string | null = null;
+            let thumbnailUrl: string | null = null;
             const POLL_INTERVAL = 10000;
 
             // Poll until a URL is found or an error occurs. No fixed timeout, relies on user cancellation.
@@ -263,7 +264,12 @@ export const generateVideo = async (
                                || opStatus.video?.fifeUrl
                                || opStatus.fifeUrl;
                     
+                    thumbnailUrl = opStatus.operation?.metadata?.video?.servingBaseUri
+                                || opStatus.metadata?.video?.servingBaseUri
+                                || null;
+                    
                     console.log('🎯 Video URL extracted:', finalUrl);
+                    console.log('🖼️ Thumbnail URL extracted:', thumbnailUrl);
                     
                     if (!finalUrl) {
                         console.error('Operation finished but no video URL was returned. Full operation object:', JSON.stringify(opStatus, null, 2));
@@ -300,7 +306,7 @@ export const generateVideo = async (
 
             addLogEntry({ model, prompt, output: '1 video generated successfully.', tokenCount: 0, status: 'Success', mediaOutput: videoFile });
             triggerUserWebhook({ type: 'video', prompt, result: videoFile });
-            return videoFile;
+            return { videoFile, thumbnailUrl };
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -355,7 +361,7 @@ export const generateVideo = async (
 
             addLogEntry({ model, prompt, output: '1 video generated successfully.', tokenCount: 0, status: 'Success', mediaOutput: videoFile });
             triggerUserWebhook({ type: 'video', prompt, result: videoFile });
-            return videoFile;
+            return { videoFile, thumbnailUrl: null };
             
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
