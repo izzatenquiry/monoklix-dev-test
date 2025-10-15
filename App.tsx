@@ -11,7 +11,7 @@ import GalleryView from './components/views/GalleryView';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import LibraryView from './components/views/LibraryView';
 import { MenuIcon, LogoIcon, XIcon, SunIcon, MoonIcon, KeyIcon } from './components/Icons';
-import { signOutUser, logActivity } from './services/userService';
+import { signOutUser, logActivity, getVeoAuthToken } from './services/userService';
 import { setActiveApiKeys, createChatSession, streamChatResponse } from './services/geminiService';
 import Spinner from './components/common/Spinner';
 import { loadData, saveData } from './services/indexedDBService';
@@ -94,6 +94,19 @@ const App: React.FC = () => {
   const [aiSupportMessages, setAiSupportMessages] = useState<Message[]>([]);
   const [aiSupportChat, setAiSupportChat] = useState<Chat | null>(null);
   const [isAiSupportLoading, setIsAiSupportLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchAndSetToken = async () => {
+      const token = await getVeoAuthToken();
+      if (token) {
+        sessionStorage.setItem('veoAuthToken', token);
+        console.log("VEO Auth Token loaded from Supabase and set in session storage.");
+      } else {
+        console.warn("Could not fetch VEO Auth Token from Supabase.");
+      }
+    };
+    fetchAndSetToken();
+  }, []);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -293,6 +306,7 @@ const App: React.FC = () => {
                     onUserUpdate={handleUserUpdate} 
                     aiSupportMessages={aiSupportMessages}
                     isAiSupportLoading={isAiSupportLoading}
+                    // FIX: Changed `onAiSupportSend` to `handleAiSupportSend` to pass the correct function prop.
                     onAiSupportSend={handleAiSupportSend}
                  />;
       default:

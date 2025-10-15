@@ -7,6 +7,25 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 export interface Database {
   public: {
     Tables: {
+      auth_token: {
+        Row: {
+          id: number
+          created_at: string
+          token: string
+          status: string | null
+        }
+        Insert: {
+          id?: number
+          created_at?: string
+          token: string
+          status?: string | null
+        }
+        Update: {
+          token?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: { // The data coming from the database
           id: string

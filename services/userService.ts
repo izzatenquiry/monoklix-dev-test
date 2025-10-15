@@ -455,3 +455,22 @@ export const logActivity = async (
         console.error('Exception while logging activity:', e);
     }
 };
+
+/**
+ * Fetches the VEO 3.0 auth token from the Supabase auth_token table.
+ * @returns {Promise<string | null>} The token string or null if not found/error.
+ */
+export const getVeoAuthToken = async (): Promise<string | null> => {
+    const { data, error } = await supabase
+        .from('auth_token')
+        .select('token')
+        .eq('id', 1)
+        .single();
+
+    if (error) {
+        console.error('Error fetching VEO auth token:', getErrorMessage(error));
+        return null;
+    }
+
+    return data?.token || null;
+};

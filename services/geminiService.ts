@@ -4,6 +4,7 @@ import { triggerUserWebhook } from './webhookService';
 import { MODELS } from './aiConfig';
 import { handleApiError } from "./errorHandler";
 import { generateVideoWithVeo3, checkVideoStatus, uploadImageForVeo3 } from './veo3Service';
+import { cropImageToAspectRatio } from "./imageService";
 
 
 // This will hold the key for the current user session. It is set by App.tsx.
@@ -185,6 +186,23 @@ export const generateVideo = async (
     authToken: string
 ): Promise<File> => {
 
+    let processedImage = image;
+
+    if (image && (aspectRatio === '16:9' || aspectRatio === '9:16')) {
+        try {
+            addLogEntry({ model, prompt: "Cropping reference image...", output: `Cropping to ${aspectRatio}...`, tokenCount: 0, status: "Success" });
+            const croppedBase64 = await cropImageToAspectRatio(image.imageBytes, aspectRatio);
+            processedImage = {
+                ...image,
+                imageBytes: croppedBase64,
+            };
+        } catch (cropError) {
+            console.error("Image cropping failed, proceeding with original image.", cropError);
+            addLogEntry({ model, prompt: "Image cropping failed", output: "Proceeding with original image.", tokenCount: 0, status: "Error", error: cropError instanceof Error ? cropError.message : String(cropError) });
+            // Don't throw, just log and continue with the original image
+        }
+    }
+
     if (model.includes('veo-3.0')) {
         // --- VEO 3.0 LOGIC (via proxy) ---
         if (!authToken) {
@@ -199,9 +217,9 @@ export const generateVideo = async (
             const aspectRatioForVeo3 = veo3AspectRatio(aspectRatio);
 
             let imageMediaId: string | undefined = undefined;
-            if (image) {
+            if (processedImage) {
                 addLogEntry({ model, prompt: "Uploading reference image...", output: "In progress...", tokenCount: 0, status: "Success" });
-                imageMediaId = await uploadImageForVeo3(image.imageBytes, image.mimeType, aspectRatioForVeo3, authToken);
+                imageMediaId = await uploadImageForVeo3(processedImage.imageBytes, processedImage.mimeType, aspectRatioForVeo3, authToken);
             }
 
             const useStandardModel = !model.includes('fast');
@@ -299,7 +317,7 @@ export const generateVideo = async (
 
             addLogEntry({ model, prompt, output: "Starting video generation...", tokenCount: 0, status: "Success" });
             
-            const imagePayload = image ? { imageBytes: image.imageBytes, mimeType: image.mimeType } : undefined;
+            const imagePayload = processedImage ? { imageBytes: processedImage.imageBytes, mimeType: processedImage.mimeType } : undefined;
 
             let operation = await ai.models.generateVideos({
                 model,

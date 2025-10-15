@@ -278,6 +278,22 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
             <p className="text-neutral-500 dark:text-neutral-400 mt-1">{T.subtitle}</p>
         </div>
 
+        <Section title={T.refImage}>
+            {previewUrl ? (
+                 <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                    <img src={previewUrl} alt="Reference Preview" className="w-full h-full object-contain bg-neutral-100 dark:bg-neutral-800" />
+                    <button onClick={removeReferenceImage} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors">
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                </div>
+            ) : (
+                <ImageUpload id="video-ref-upload" key={imageUploadKey} onImageUpload={handleImageUpload} title={T.uploadImage}/>
+            )}
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 p-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-md">
+                {T.refImageNote}
+            </p>
+        </Section>
+
         <Section title={T.modelFormat}>
             <div className={`grid grid-cols-1 ${isVeo3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
                 <div className={isVeo3 ? 'sm:col-span-1' : 'sm:col-span-1'}>
@@ -337,22 +353,6 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
                 />
             </div>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 p-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-md" dangerouslySetInnerHTML={{ __html: T.dialogueAudioNote }}/>
-        </Section>
-
-        <Section title={T.refImage}>
-            {previewUrl ? (
-                 <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                    <img src={previewUrl} alt="Reference Preview" className="w-full h-full object-contain bg-neutral-100 dark:bg-neutral-800" />
-                    <button onClick={removeReferenceImage} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors">
-                        <TrashIcon className="w-4 h-4" />
-                    </button>
-                </div>
-            ) : (
-                <ImageUpload id="video-ref-upload" key={imageUploadKey} onImageUpload={handleImageUpload} title={T.uploadImage}/>
-            )}
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 p-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-md">
-                {T.refImageNote}
-            </p>
         </Section>
         
         <div className="pt-4 mt-auto">

@@ -12,7 +12,6 @@ import { getSupportPrompt } from '../../services/promptManager';
 import { runApiHealthCheck, type HealthCheckResult } from '../../services/geminiService';
 import { getTranslations } from '../../services/translations';
 import ApiKeyClaimPanel from '../common/ApiKeyClaimPanel';
-import { VEO_3_AUTH_TOKEN } from '../../services/aiConfig';
 
 // Define the types for the tabs in the settings view
 type SettingsTabId = 'profile' | 'api' | 'ai-support' | 'content-admin' | 'user-db';
@@ -132,12 +131,6 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
     const [isCheckingHealth, setIsCheckingHealth] = useState(false);
     const [healthCheckResults, setHealthCheckResults] = useState<HealthCheckResult[] | null>(null);
     
-    useEffect(() => {
-        const savedToken = sessionStorage.getItem('veoAuthToken');
-        if (!savedToken) {
-            sessionStorage.setItem('veoAuthToken', VEO_3_AUTH_TOKEN);
-        }
-    }, []);
 
     const handleSaveApiKey = async () => {
         setApiKeyStatus({ type: 'loading', message: 'Saving API Key...' });
