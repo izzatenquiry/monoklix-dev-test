@@ -28,7 +28,8 @@ export const handleApiError = (error: unknown): void => {
         lowerCaseMessage.includes('api key not valid');
 
     if (isApiKeyError) {
-        eventBus.dispatch('showApiKeyClaimModal');
+        // Instead of showing the modal directly, trigger an auto-claim attempt first.
+        eventBus.dispatch('initiateAutoApiKeyClaim');
     }
 
     // Don't add a redundant suggestion if the original error is already helpful.

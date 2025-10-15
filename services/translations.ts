@@ -39,6 +39,7 @@ export const translations = {
       imageGallery: 'Gallery',
       socialPostStudio: 'Social Post Studio',
       settings: 'Settings',
+      cacheManager: 'Cache Manager',
       logout: 'Log Out',
       aiAgent: 'AI Agent',
     },
@@ -807,6 +808,7 @@ export const translations = {
       imageGallery: 'Galeri',
       socialPostStudio: 'Social Post Studio',
       settings: 'Tetapan',
+      cacheManager: 'Pengurus Cache',
       logout: 'Log Keluar',
       aiAgent: 'Ejen AI',
     },
@@ -945,7 +947,7 @@ export const translations = {
           sub5_1_p1: 'Alat utama untuk mencipta imej daripada teks atau menyunting gambar sedia ada.',
           sub5_1_ul: [
               '**Teks-ke-Imej:** Biarkan bahagian "Imej Rujukan" kosong. Tulis prompt anda (cth: "seorang angkasawan di bulan, pencahayaan sinematik, hiperrealistik"), pilih nisbah aspek, dan klik Jana.',
-              '**Imej-ke-Imej (Menyunting):** Muat naik 1-5 imej rujukan. Tulis arahan suntingan dalam medan prompt (cth: "tambahkan topi hari jadi pada orang itu").'
+              '**Imej-ke-Imej (Menyunting):** Muat naik 1-5 imej rujukan. Tulis arahan suntingan dalam medan prompt (cth: "tambah topi hari jadi pada orang itu").'
           ],
           sub5_2_title: '5.2. Gambar Produk',
           sub5_2_p1: 'Letakkan produk anda dalam latar belakang yang profesional.',

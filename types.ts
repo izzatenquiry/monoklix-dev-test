@@ -18,7 +18,8 @@ export type View =
   | 'gallery'
   // Settings & Admin
   | 'settings'
-  | 'api-generator';
+  | 'api-generator'
+  | 'cache-manager';
 
 export interface NavItem {
   id: View | 'logout';
@@ -38,7 +39,7 @@ export type HistoryItemType = 'Image' | 'Video' | 'Storyboard' | 'Canvas' | 'Aud
 
 export interface HistoryItem {
   id: string;
-  userId: string;
+  userId?: string; // Made optional to support older history items
   type: HistoryItemType;
   prompt: string;
   // result can be a base64 string for images/canvas, a Blob for video/audio, or plain text for copy/storyboard.

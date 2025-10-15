@@ -1,7 +1,7 @@
 import React from 'react';
 import { type View, type NavItem, type User, type Language } from '../types';
 import {
-  ImageIcon, VideoIcon, SettingsIcon, BookOpenIcon, LogoutIcon, GalleryIcon, LogoIcon, XIcon, LibraryIcon, FileTextIcon, GraduationCapIcon, TrendingUpIcon, RobotIcon, MegaphoneIcon
+  ImageIcon, VideoIcon, SettingsIcon, BookOpenIcon, LogoutIcon, GalleryIcon, LogoIcon, XIcon, LibraryIcon, FileTextIcon, GraduationCapIcon, TrendingUpIcon, RobotIcon, MegaphoneIcon, DatabaseIcon
 } from './Icons';
 import { getTranslations } from '../services/translations';
 
@@ -16,6 +16,7 @@ const getNavItems = (T: ReturnType<typeof getTranslations>['sidebar']): NavItem[
   { id: 'ai-prompt-library-suite', label: T.promptLibrary, section: 'free', icon: LibraryIcon, isNew: true },
   { id: 'social-post-studio', label: T.socialPostStudio, section: 'free', icon: MegaphoneIcon, isNew: true, roles: ['admin'] },
   { id: 'settings', label: T.settings, section: 'bottom', icon: SettingsIcon, roles: ['admin', 'user'] },
+  { id: 'cache-manager', label: T.cacheManager, section: 'bottom', icon: DatabaseIcon, roles: ['admin', 'user'] },
   { id: 'logout', label: T.logout, section: 'bottom', icon: LogoutIcon, roles: ['admin', 'user'] }
 ];
 

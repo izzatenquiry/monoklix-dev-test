@@ -688,6 +688,31 @@ export const runMinimalHealthCheck = async (apiKeyToCheck: string): Promise<{ im
     };
 };
 
+/**
+ * A lightweight check specifically for the image model, for auto-key-claiming.
+ * @param {string} apiKeyToCheck - The API key to test.
+ * @returns {Promise<boolean>} A promise that resolves to true if the image model is accessible.
+ */
+export const isImageModelHealthy = async (apiKeyToCheck: string): Promise<boolean> => {
+    if (!apiKeyToCheck) return false;
+
+    try {
+        const ai = new GoogleGenAI({ apiKey: apiKeyToCheck });
+        const tinyPngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        
+        await ai.models.generateContent({
+            model: MODELS.imageEdit,
+            contents: { parts: [{ inlineData: { data: tinyPngBase64, mimeType: 'image/png' } }, { text: 'test' }] },
+            config: { responseModalities: [Modality.TEXT] },
+        });
+        
+        return true;
+    } catch (error) {
+        console.debug(`Image model health check failed for key:`, (error as Error).message);
+        return false;
+    }
+};
+
 
 // --- ADMIN API HEALTH CHECK ---
 

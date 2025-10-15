@@ -10,9 +10,9 @@ import LoginPage from './LoginPage';
 import GalleryView from './components/views/GalleryView';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import LibraryView from './components/views/LibraryView';
-import { MenuIcon, LogoIcon, XIcon, SunIcon, MoonIcon, KeyIcon } from './components/Icons';
-import { signOutUser, logActivity, getVeoAuthToken } from './services/userService';
-import { setActiveApiKeys, createChatSession, streamChatResponse } from './services/geminiService';
+import { MenuIcon, LogoIcon, XIcon, SunIcon, MoonIcon, KeyIcon, CheckCircleIcon, AlertTriangleIcon, PartyPopperIcon } from './components/Icons';
+import { signOutUser, logActivity, getVeoAuthToken, getAvailableApiKeys, saveUserApiKey, claimApiKey } from './services/userService';
+import { setActiveApiKeys, createChatSession, streamChatResponse, isImageModelHealthy } from './services/geminiService';
 import Spinner from './components/common/Spinner';
 import { loadData, saveData } from './services/indexedDBService';
 import { type Chat } from '@google/genai';
@@ -24,6 +24,7 @@ import AiPromptLibrarySuiteView from './components/views/AiPromptLibrarySuiteVie
 import SocialPostStudioView from './components/views/SocialPostStudioView';
 import eventBus from './services/eventBus';
 import ApiKeyModal from './components/ApiKeyModal';
+import CacheManagerView from './components/views/CacheManagerView';
 
 
 interface VideoGenPreset {
@@ -72,6 +73,48 @@ const ThemeSwitcher: React.FC<{ theme: string; setTheme: (theme: string) => void
     </button>
 );
 
+const AutoFixBanner: React.FC<{ status: 'in-progress' | 'success' | 'failed'; onClose: () => void }> = ({ status, onClose }) => {
+  const content = {
+    'in-progress': {
+      icon: <Spinner />,
+      message: 'API key error detected. Attempting to automatically find a new key...',
+      bg: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200',
+    },
+    success: {
+      icon: <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />,
+      message: 'Connection restored! A new, healthy API key has been applied automatically.',
+      bg: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200',
+    },
+    failed: {
+      icon: <AlertTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />,
+      message: 'Auto-repair failed. No healthy API keys found. Please claim one manually.',
+      bg: 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200',
+    },
+  }[status];
+
+  return (
+    <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-4 animate-zoomIn ${content.bg}`}>
+      {content.icon}
+      <p className="text-sm font-semibold">{content.message}</p>
+      <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10">
+        <XIcon className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+const OnboardingNotification: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <div className="fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-4 animate-zoomIn bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200">
+    <PartyPopperIcon className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+    <p className="text-sm font-semibold">
+      We've automatically assigned a temporary API key to get you started!
+    </p>
+    <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10">
+      <XIcon className="w-4 h-4" />
+    </button>
+  </div>
+);
+
 
 const App: React.FC = () => {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -86,6 +129,8 @@ const App: React.FC = () => {
   const [isShowingWelcome, setIsShowingWelcome] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [autoClaimStatus, setAutoClaimStatus] = useState<'idle' | 'in-progress' | 'success' | 'failed'>('idle');
+  const [showOnboardingNotification, setShowOnboardingNotification] = useState(false);
 
 
   const T = getTranslations(language);
@@ -177,24 +222,98 @@ const App: React.FC = () => {
     }
   }, [justLoggedIn]);
   
-  // Effect to handle global API key error events
+  // Effect to handle manual API key modal opening
   useEffect(() => {
-    const handler = () => {
-      setIsApiKeyModalOpen(true);
-    };
-
+    const handler = () => setIsApiKeyModalOpen(true);
     eventBus.on('showApiKeyClaimModal', handler);
-    return () => {
-      eventBus.remove('showApiKeyClaimModal', handler);
-    };
+    return () => eventBus.remove('showApiKeyClaimModal', handler);
   }, []);
+  
+  // Effect for automatic API key recovery
+  const handleUserUpdate = useCallback((updatedUser: User) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+  }, []);
+
+  useEffect(() => {
+    const handleAutoClaim = async () => {
+      if (!currentUser) return;
+      setAutoClaimStatus('in-progress');
+
+      try {
+        const availableKeys = await getAvailableApiKeys();
+        if (availableKeys.length === 0) {
+          throw new Error('No new keys available.');
+        }
+
+        let healthyKeyFound = false;
+        for (const key of availableKeys) {
+          console.log(`Auto-checking key: ...${key.apiKey.slice(-4)}`);
+          const isHealthy = await isImageModelHealthy(key.apiKey);
+          if (isHealthy) {
+            console.log(`Healthy key found: ...${key.apiKey.slice(-4)}. Applying...`);
+            const saveResult = await saveUserApiKey(currentUser.id, key.apiKey);
+            if (saveResult.success) {
+              handleUserUpdate(saveResult.user);
+              setAutoClaimStatus('success');
+              healthyKeyFound = true;
+              break; 
+            }
+          }
+        }
+
+        if (!healthyKeyFound) {
+          throw new Error('No healthy keys found among available ones.');
+        }
+
+      } catch (error) {
+        console.error('Auto API key claim failed:', error);
+        setAutoClaimStatus('failed');
+        // Fallback to manual modal if auto-claim fails
+        setTimeout(() => eventBus.dispatch('showApiKeyClaimModal'), 1000);
+      }
+    };
+    
+    eventBus.on('initiateAutoApiKeyClaim', handleAutoClaim);
+    return () => {
+      eventBus.remove('initiateAutoApiKeyClaim', handleAutoClaim);
+    };
+  }, [currentUser, handleUserUpdate]);
 
 
   const handleLoginSuccess = (user: User) => {
-    setCurrentUser(user);
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    handleUserUpdate(user);
     setJustLoggedIn(true);
-    logActivity('login'); // Log the login event
+    logActivity('login');
+
+    // NEW: Auto-claim an API key if the user doesn't have one.
+    if (!user.apiKey) {
+      console.log("User logged in without an API key. Attempting to auto-claim one.");
+      // Fire-and-forget this process so it doesn't block the UI
+      (async () => {
+        try {
+          const availableKeys = await getAvailableApiKeys();
+          if (availableKeys.length > 0) {
+            const keyToClaim = availableKeys[0]; // Take the first available key
+            await claimApiKey(keyToClaim.id, user.id, user.username);
+            const saveResult = await saveUserApiKey(user.id, keyToClaim.apiKey);
+            // FIX: Refactored to explicitly check the failure case first. This helps TypeScript
+            // correctly narrow the discriminated union type and access the `message` property without error.
+            if (saveResult.success === false) {
+              throw new Error(saveResult.message);
+            }
+            handleUserUpdate(saveResult.user); // Update state and local storage with the new key
+            setShowOnboardingNotification(true);
+            console.log("Successfully auto-claimed and assigned an API key to the new user.");
+          } else {
+            console.warn("No available API keys to auto-claim for new user.");
+          }
+        } catch (error) {
+          console.error("Auto-claim for new user failed:", error);
+          // Fail silently. The user will be prompted later if they try to use an AI feature.
+        }
+      })();
+    }
   };
 
   const handleLogout = async () => {
@@ -202,11 +321,6 @@ const App: React.FC = () => {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     setActiveView('home');
-  };
-
-  const handleUserUpdate = (updatedUser: User) => {
-    setCurrentUser(updatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
   
   const handleAiSupportSend = useCallback(async (prompt: string) => {
@@ -309,6 +423,8 @@ const App: React.FC = () => {
                     // FIX: Changed `onAiSupportSend` to `handleAiSupportSend` to pass the correct function prop.
                     onAiSupportSend={handleAiSupportSend}
                  />;
+      case 'cache-manager':
+          return <CacheManagerView />;
       default:
         return <ECourseView {...commonProps}/>;
     }
@@ -408,6 +524,17 @@ const App: React.FC = () => {
           {PageContent}
         </div>
       </main>
+
+      {autoClaimStatus !== 'idle' && (
+        <AutoFixBanner
+          status={autoClaimStatus}
+          onClose={() => setAutoClaimStatus('idle')}
+        />
+      )}
+
+      {showOnboardingNotification && (
+        <OnboardingNotification onClose={() => setShowOnboardingNotification(false)} />
+      )}
 
       <ApiKeyModal
           isOpen={isApiKeyModalOpen}
