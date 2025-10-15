@@ -207,6 +207,18 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
           if (!((videoFile as unknown) instanceof Blob)) {
             throw new Error('generateVideo did not return a valid File/Blob object');
           }
+
+          // --- AUTO-DOWNLOAD ---
+          const downloadUrl_auto = URL.createObjectURL(videoFile);
+          const a_auto = document.createElement('a');
+          a_auto.style.display = 'none';
+          a_auto.href = downloadUrl_auto;
+          a_auto.download = videoFile.name || `monoklix-video-${Date.now()}.mp4`;
+          document.body.appendChild(a_auto);
+          a_auto.click();
+          document.body.removeChild(a_auto);
+          URL.revokeObjectURL(downloadUrl_auto);
+          // --- END AUTO-DOWNLOAD ---
           
           const blobUrl = URL.createObjectURL(videoFile);
           
