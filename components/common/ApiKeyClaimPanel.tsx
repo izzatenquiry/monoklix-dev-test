@@ -5,25 +5,24 @@ import {
     KeyIcon, CheckCircleIcon, XIcon, AlertTriangleIcon
 } from '../Icons';
 import Spinner from './Spinner';
-import { getAvailableApiKeys, claimApiKey, saveUserApiKey, type AvailableApiKey } from '../../services/userService';
+import { getAvailableApiKeys, claimApiKey, type AvailableApiKey } from '../../services/userService';
 import { runApiHealthCheck, type HealthCheckResult } from '../../services/geminiService';
+import eventBus from '../../services/eventBus';
+
 
 interface ApiKeyClaimPanelProps {
   language: Language;
   currentUser: User;
-  onUserUpdate: (user: User) => void;
   onClaimSuccess?: () => void;
 }
 
 const servicesToCheck = [
     { label: 'Text', model: 'gemini-2.5-flash' },
     { label: 'Image Gen', model: 'imagen-4.0-generate-001' },
-    { label: 'Image Edit', model: 'gemini-2.5-flash-image' },
-    { label: 'VEO 2', model: 'veo-2.0-generate-001' },
-    { label: 'VEO 3', model: 'veo-3.0' }
+    { label: 'Image Edit', model: 'gemini-2.5-flash-image' }
 ];
 
-const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUser, onUserUpdate, onClaimSuccess }) => {
+const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUser, onClaimSuccess }) => {
     const T = getTranslations(language).apiGeneratorView;
     
     const [isLoading, setIsLoading] = useState(false);
@@ -59,13 +58,6 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
         setError(null);
         setStatusMessage(null);
 
-        const saveResult = await saveUserApiKey(currentUser.id, key.apiKey);
-        if (saveResult.success === false) {
-            setError(T.applyError.replace('{error}', saveResult.message));
-            setIsLoading(false);
-            return;
-        }
-
         const claimResult = await claimApiKey(key.id, currentUser.id, currentUser.username);
         if (!claimResult.success) {
             setError(T.claimError.replace('{error}', claimResult.message || 'Unknown error'));
@@ -73,10 +65,10 @@ const ApiKeyClaimPanel: React.FC<ApiKeyClaimPanelProps> = ({ language, currentUs
             return;
         }
         
-        onUserUpdate(saveResult.user);
+        // Dispatch event to notify the app of the new temporary key
+        eventBus.dispatch('tempKeyClaimed', key.apiKey);
         
         setCopiedKeyId(key.id);
-        navigator.clipboard.writeText(key.apiKey);
         setStatusMessage(T.successMessage);
         
         setAvailableKeys([]);

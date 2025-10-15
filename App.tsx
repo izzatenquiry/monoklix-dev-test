@@ -11,7 +11,8 @@ import GalleryView from './components/views/GalleryView';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import LibraryView from './components/views/LibraryView';
 import { MenuIcon, LogoIcon, XIcon, SunIcon, MoonIcon, KeyIcon, CheckCircleIcon, AlertTriangleIcon, PartyPopperIcon } from './components/Icons';
-import { signOutUser, logActivity, getVeoAuthToken, getAvailableApiKeys, saveUserApiKey, claimApiKey } from './services/userService';
+// FIX: Moved `getAvailableApiKeys` import from `geminiService` to `userService` to fix an incorrect import path.
+import { signOutUser, logActivity, getVeoAuthToken, getAvailableApiKeys } from './services/userService';
 import { setActiveApiKeys, createChatSession, streamChatResponse, isImageModelHealthy } from './services/geminiService';
 import Spinner from './components/common/Spinner';
 import { loadData, saveData } from './services/indexedDBService';
@@ -118,6 +119,7 @@ const OnboardingNotification: React.FC<{ onClose: () => void }> = ({ onClose }) 
 const App: React.FC = () => {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [tempApiKey, setTempApiKey] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<View>('home');
   const [theme, setTheme] = useState('light'); // Default to light, load async
   const [language, setLanguage] = useState<Language>('en');
@@ -178,26 +180,31 @@ const App: React.FC = () => {
   }, [language]);
 
 
-  // Effect to manage the active API key and initialize dependent services like AI chat.
-  // This consolidation prevents a race condition where the chat might initialize before the key is set.
+  // Effect to listen for temporary key claims from anywhere in the app
   useEffect(() => {
-    if (currentUser) {
-        setActiveApiKeys({ textKey: currentUser.apiKey || null });
-        
-        if (currentUser.apiKey) {
-            const systemInstruction = getSupportPrompt();
-            const session = createChatSession(systemInstruction);
-            setAiSupportChat(session);
-        } else {
-            setAiSupportChat(null);
-            setAiSupportMessages([]);
-        }
+    const handler = (key: string) => {
+      setTempApiKey(key);
+    };
+    eventBus.on('tempKeyClaimed', handler);
+    return () => {
+      eventBus.remove('tempKeyClaimed', handler);
+    };
+  }, []);
+
+  // Consolidated effect to manage the active API key and initialize dependent services.
+  useEffect(() => {
+    const keyToUse = currentUser?.apiKey || tempApiKey;
+    setActiveApiKeys({ textKey: keyToUse });
+
+    if (keyToUse) {
+      const systemInstruction = getSupportPrompt();
+      const session = createChatSession(systemInstruction);
+      setAiSupportChat(session);
     } else {
-        setActiveApiKeys({ textKey: null });
-        setAiSupportChat(null);
-        setAiSupportMessages([]);
+      setAiSupportChat(null);
+      setAiSupportMessages([]);
     }
-  }, [currentUser]);
+  }, [currentUser, tempApiKey]);
   
   // Effect to check for an active session in localStorage on initial load.
   useEffect(() => {
@@ -228,46 +235,47 @@ const App: React.FC = () => {
     return () => eventBus.remove('showApiKeyClaimModal', handler);
   }, []);
   
-  // Effect for automatic API key recovery
   const handleUserUpdate = useCallback((updatedUser: User) => {
     setCurrentUser(updatedUser);
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    // If user saves their own key, the temporary one is no longer needed for this session.
+    if (updatedUser.apiKey) {
+        setTempApiKey(null);
+    }
   }, []);
 
+  const findAndSetSharedKey = useCallback(async () => {
+    try {
+        const availableKeys = await getAvailableApiKeys();
+        if (availableKeys.length === 0) throw new Error('No keys available.');
+
+        // Keys are sorted newest first from the service
+        for (const key of availableKeys) {
+            console.log(`Checking shared key: ...${key.apiKey.slice(-4)}`);
+            const isHealthy = await isImageModelHealthy(key.apiKey);
+            if (isHealthy) {
+                console.log(`Found healthy shared key: ...${key.apiKey.slice(-4)}`);
+                setTempApiKey(key.apiKey);
+                return true; // Success
+            }
+        }
+        throw new Error('No healthy shared keys found among available ones.');
+    } catch (error) {
+        console.error('Failed to find and set a shared key:', error);
+        return false; // Failure
+    }
+  }, []);
+
+  // Effect for automatic API key recovery
   useEffect(() => {
     const handleAutoClaim = async () => {
       if (!currentUser) return;
       setAutoClaimStatus('in-progress');
+      
+      const success = await findAndSetSharedKey();
+      setAutoClaimStatus(success ? 'success' : 'failed');
 
-      try {
-        const availableKeys = await getAvailableApiKeys();
-        if (availableKeys.length === 0) {
-          throw new Error('No new keys available.');
-        }
-
-        let healthyKeyFound = false;
-        for (const key of availableKeys) {
-          console.log(`Auto-checking key: ...${key.apiKey.slice(-4)}`);
-          const isHealthy = await isImageModelHealthy(key.apiKey);
-          if (isHealthy) {
-            console.log(`Healthy key found: ...${key.apiKey.slice(-4)}. Applying...`);
-            const saveResult = await saveUserApiKey(currentUser.id, key.apiKey);
-            if (saveResult.success) {
-              handleUserUpdate(saveResult.user);
-              setAutoClaimStatus('success');
-              healthyKeyFound = true;
-              break; 
-            }
-          }
-        }
-
-        if (!healthyKeyFound) {
-          throw new Error('No healthy keys found among available ones.');
-        }
-
-      } catch (error) {
-        console.error('Auto API key claim failed:', error);
-        setAutoClaimStatus('failed');
+      if (!success) {
         // Fallback to manual modal if auto-claim fails
         setTimeout(() => eventBus.dispatch('showApiKeyClaimModal'), 1000);
       }
@@ -277,7 +285,7 @@ const App: React.FC = () => {
     return () => {
       eventBus.remove('initiateAutoApiKeyClaim', handleAutoClaim);
     };
-  }, [currentUser, handleUserUpdate]);
+  }, [currentUser, findAndSetSharedKey]);
 
 
   const handleLoginSuccess = (user: User) => {
@@ -285,33 +293,17 @@ const App: React.FC = () => {
     setJustLoggedIn(true);
     logActivity('login');
 
-    // NEW: Auto-claim an API key if the user doesn't have one.
+    // If user logs in without their own key, find a shared one for the session.
     if (!user.apiKey) {
-      console.log("User logged in without an API key. Attempting to auto-claim one.");
-      // Fire-and-forget this process so it doesn't block the UI
-      (async () => {
-        try {
-          const availableKeys = await getAvailableApiKeys();
-          if (availableKeys.length > 0) {
-            const keyToClaim = availableKeys[0]; // Take the first available key
-            await claimApiKey(keyToClaim.id, user.id, user.username);
-            const saveResult = await saveUserApiKey(user.id, keyToClaim.apiKey);
-            // FIX: Refactored to explicitly check the failure case first. This helps TypeScript
-            // correctly narrow the discriminated union type and access the `message` property without error.
-            if (saveResult.success === false) {
-              throw new Error(saveResult.message);
-            }
-            handleUserUpdate(saveResult.user); // Update state and local storage with the new key
-            setShowOnboardingNotification(true);
-            console.log("Successfully auto-claimed and assigned an API key to the new user.");
-          } else {
-            console.warn("No available API keys to auto-claim for new user.");
-          }
-        } catch (error) {
-          console.error("Auto-claim for new user failed:", error);
-          // Fail silently. The user will be prompted later if they try to use an AI feature.
+      console.log("User has no personal key. Finding a shared key for the session.");
+      findAndSetSharedKey().then(success => {
+        if (success) {
+          setShowOnboardingNotification(true);
+          console.log("Successfully set a shared API key for the new user session.");
+        } else {
+          console.warn("No available shared API keys to assign for new user session.");
         }
-      })();
+      });
     }
   };
 
@@ -319,6 +311,7 @@ const App: React.FC = () => {
     await signOutUser();
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
+    setTempApiKey(null);
     setActiveView('home');
   };
   
@@ -419,7 +412,6 @@ const App: React.FC = () => {
                     onUserUpdate={handleUserUpdate} 
                     aiSupportMessages={aiSupportMessages}
                     isAiSupportLoading={isAiSupportLoading}
-                    // FIX: Changed `onAiSupportSend` to `handleAiSupportSend` to pass the correct function prop.
                     onAiSupportSend={handleAiSupportSend}
                  />;
       default:
@@ -447,17 +439,15 @@ const App: React.FC = () => {
   }
 
   // --- Access Control Logic ---
+  const activeApiKey = currentUser.apiKey || tempApiKey;
   let isBlocked = false;
   let blockMessage = { title: T.apiKeyRequiredTitle, body: T.apiKeyRequiredBody };
   const aiPoweredViews: View[] = ['ai-text-suite', 'ai-image-suite', 'ai-video-suite', 'social-post-studio'];
 
   if (aiPoweredViews.includes(activeView)) {
-      // First, check for API key. This is a hard requirement for all.
-      if (!currentUser.apiKey) {
+      if (!activeApiKey) {
           isBlocked = true;
-          // The default message is fine for this case.
       } 
-      // NEW LOGIC: Now check for subscription expiry
       else if (currentUser.status === 'subscription') {
           const oneYearInMillis = 365 * 24 * 60 * 60 * 1000;
           const registrationDate = new Date(currentUser.createdAt).getTime();
@@ -511,7 +501,7 @@ const App: React.FC = () => {
                 className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                 aria-label="Request an API key"
               >
-                <KeyIcon className={`w-5 h-5 transition-colors ${currentUser.apiKey ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
+                <KeyIcon className={`w-5 h-5 transition-colors ${activeApiKey ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
               </button>
               <ThemeSwitcher theme={theme} setTheme={setTheme} />
               <LanguageSwitcher language={language} setLanguage={setLanguage} />

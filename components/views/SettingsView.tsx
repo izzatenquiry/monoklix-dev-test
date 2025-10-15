@@ -438,7 +438,8 @@ const ApiIntegrationsPanel: React.FC<{ currentUser: User, onUserUpdate: (user: U
                 </div>
             </div>
             <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-sm">
-                <ApiKeyClaimPanel currentUser={currentUser} onUserUpdate={onUserUpdate} language={language} />
+                {/* FIX: Removed unsupported `onUserUpdate` prop from `ApiKeyClaimPanel`. */}
+                <ApiKeyClaimPanel currentUser={currentUser} language={language} />
             </div>
         </div>
     );

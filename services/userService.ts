@@ -312,14 +312,13 @@ export const updateUserWebhookUrl = async (
 };
 
 export const getAvailableApiKeys = async (): Promise<AvailableApiKey[]> => {
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
     const { data, error } = await supabase
         .from('generated_api_keys')
         .select('id, api_key, created_at')
-        .is('claimed_by_user_id', null)
-        .gt('created_at', thirtyMinutesAgo)
-        .order('created_at', { ascending: true });
+        .gt('created_at', oneHourAgo)
+        .order('created_at', { ascending: false });
     
     if (error) {
         console.error('Error fetching available API keys:', error);

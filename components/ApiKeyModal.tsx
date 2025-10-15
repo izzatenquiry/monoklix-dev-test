@@ -44,7 +44,6 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, currentUser,
                     <ApiKeyClaimPanel 
                         language={language}
                         currentUser={currentUser}
-                        onUserUpdate={onUserUpdate}
                         onClaimSuccess={handleClaimSuccess}
                     />
                 </div>
