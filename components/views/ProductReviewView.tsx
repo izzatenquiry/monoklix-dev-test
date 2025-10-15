@@ -410,7 +410,8 @@ const runVideoGeneration = async (index: number) => {
         mimeType: 'image/png' 
       };
       
-      const videoPrompt = parsedScenes[index];
+      const sceneDescription = parsedScenes[index];
+      const videoPrompt = `Generate a video based on the following scene description. The entire video's context, setting, and any spoken language must be strictly in ${selectedLanguage}. Scene: ${sceneDescription}`;
       const tokenToUse = authToken || sessionStorage.getItem('veoAuthToken') || '';
       
       const videoFile = await generateVideo(
@@ -457,7 +458,7 @@ const runVideoGeneration = async (index: number) => {
       
       await addHistoryItem({ 
         type: 'Video', 
-        prompt: `Storyboard Scene ${index + 1}: ${videoPrompt}`, 
+        prompt: `Storyboard Scene ${index + 1}: ${sceneDescription}`, 
         result: videoFile 
       });
       

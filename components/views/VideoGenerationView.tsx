@@ -191,12 +191,18 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
         fullPrompt = `${faceFidelityInstruction}. ${fullPrompt}`;
       }
   
-      if (dialogue.trim()) {
-          fullPrompt += `. The video should display the following text as on-screen captions: "${dialogue.trim()}"`;
+      // If there is spoken dialogue (which is Malay), enforce the language for the entire video context.
+      if (dialogueAudio.trim() && isVeo3) {
+          const languageInstruction = "The entire video's context, setting, and spoken language must be strictly in Bahasa Melayu Malaysia.";
+          // Prepend language instruction to the core visual prompt
+          fullPrompt = `${languageInstruction} ${fullPrompt}`;
+          // Now append the dialogue instructions
+          fullPrompt += `. The video must include the following spoken dialogue: "${dialogueAudio.trim()}"`;
       }
 
-      if (dialogueAudio.trim() && isVeo3) {
-          fullPrompt += `. The video should include the following spoken dialogue in Bahasa Melayu Malaysia: "${dialogueAudio.trim()}"`;
+      // Add on-screen text if provided. This happens after potential language instruction.
+      if (dialogue.trim()) {
+          fullPrompt += `. The video should display the following text as on-screen captions: "${dialogue.trim()}"`;
       }
 
       try {
