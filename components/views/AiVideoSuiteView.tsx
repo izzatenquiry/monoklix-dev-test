@@ -41,7 +41,7 @@ const AiVideoSuiteView: React.FC<AiVideoSuiteViewProps> = ({ preset, clearPreset
     }, [preset]);
     
     useEffect(() => {
-        if (currentUser.role !== 'admin' && activeTab === 'batch') {
+        if (currentUser.role !== 'admin' && (activeTab === 'batch' || activeTab === 'combiner')) {
             setActiveTab('generation');
         }
     }, [currentUser.role, activeTab]);
@@ -50,7 +50,7 @@ const AiVideoSuiteView: React.FC<AiVideoSuiteViewProps> = ({ preset, clearPreset
         { id: 'generation', label: T.videoGeneration },
         { id: 'storyboard', label: T.videoStoryboard },
         { id: 'batch', label: T.batchProcessor, adminOnly: true },
-        { id: 'combiner', label: T.videoCombiner },
+        { id: 'combiner', label: T.videoCombiner, adminOnly: true },
         { id: 'voice', label: T.voiceStudio }
     ];
 

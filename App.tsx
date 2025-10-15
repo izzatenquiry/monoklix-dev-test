@@ -273,7 +273,7 @@ const App: React.FC = () => {
       case 'get-started':
         return <GetStartedView {...commonProps} />;
       case 'ai-text-suite':
-        return <AiTextSuiteView {...commonProps} />;
+        return <AiTextSuiteView {...commonProps} currentUser={currentUser!} />;
       case 'ai-image-suite':
         return <AiImageSuiteView 
                   {...commonProps}

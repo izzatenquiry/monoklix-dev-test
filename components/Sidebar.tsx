@@ -14,7 +14,7 @@ const getNavItems = (T: ReturnType<typeof getTranslations>['sidebar']): NavItem[
   { id: 'ai-video-suite', label: T.aiVideo, section: 'free', icon: VideoIcon },
   { id: 'gallery', label: T.imageGallery, section: 'free', icon: GalleryIcon },
   { id: 'ai-prompt-library-suite', label: T.promptLibrary, section: 'free', icon: LibraryIcon, isNew: true },
-  { id: 'social-post-studio', label: T.socialPostStudio, section: 'free', icon: MegaphoneIcon, isNew: true },
+  { id: 'social-post-studio', label: T.socialPostStudio, section: 'free', icon: MegaphoneIcon, isNew: true, roles: ['admin'] },
   { id: 'settings', label: T.settings, section: 'bottom', icon: SettingsIcon, roles: ['admin', 'user'] },
   { id: 'logout', label: T.logout, section: 'bottom', icon: LogoutIcon, roles: ['admin', 'user'] }
 ];

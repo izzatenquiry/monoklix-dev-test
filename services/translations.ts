@@ -148,8 +148,8 @@ export const translations = {
         safetyFilterTitle: 'Important Note on Safety Filters:',
         safetyFilterP1: 'Google has a very strict AI safety filtering system to prevent misuse.',
         safetyFilterUl: [
-          'Output May Be Missing: If you use a facial image (especially a real face) and find that no image is generated (empty output), it has likely been blocked by this safety filter.',
-          'How to Overcome: If this happens, don\'t worry. Try modifying your request. You can:',
+          '**Output May Be Missing:** If you use a facial image (especially a real face) and find that no image is generated (empty output), it has likely been blocked by this safety filter.',
+          '**How to Overcome:** If this happens, don\'t worry. Try modifying your request. You can:',
         ],
         safetyFilterOl: [
             'Change the Prompt: Use more general and safe wording.',
@@ -182,8 +182,8 @@ export const translations = {
           sub5_1_title: '5.1. Image Generation',
           sub5_1_p1: 'The main tool for creating images from text or editing existing images.',
           sub5_1_ul: [
-              'Text-to-Image: Leave the "Reference Images" section empty. Write your prompt (e.g., "an astronaut on the moon, cinematic"), select an aspect ratio, and click Generate.',
-              'Image-to-Image (Editing): Upload 1-5 reference images. Write editing instructions in the prompt field (e.g., "add a hat to the person").'
+              '**Text-to-Image:** Leave the "Reference Images" section empty. Write your prompt (e.g., "an astronaut on the moon, cinematic"), select an aspect ratio, and click Generate.',
+              '**Image-to-Image (Editing):** Upload 1-5 reference images. Write editing instructions in the prompt field (e.g., "add a hat to the person").'
           ],
           sub5_2_title: '5.2. Product Photos',
           sub5_2_p1: 'Place your product in a professional background.',
@@ -215,15 +215,18 @@ export const translations = {
           sub6_2_p1: 'An advanced tool for planning product review videos.',
           sub6_2_p2: '2-Step Process:',
           sub6_2_ol: [
-              'Generate Storyboard: Upload a product image and a model\'s face photo. Fill in the product description and choose creative settings. Click Generate Storyboard. The AI will produce a 4-scene script.',
-              'Create Images: After the storyboard is ready, click the Create 4 Images button. The AI will generate one image for each scene in the storyboard.'
+              '**Generate Storyboard:** Upload a product image and a model\'s face photo. Fill in the product description and choose creative settings. Click Generate Storyboard. The AI will produce a 4-scene script.',
+              '**Create Images:** After the storyboard is ready, click the Create 4 Images button. The AI will generate one image for each scene in the storyboard.'
           ],
-          sub6_3_title: '6.3. Video Combiner',
-          sub6_3_p1: 'Combine multiple video clips into one.',
-          sub6_3_p2: 'How to Use: Select the videos you have generated (from your Gallery). Click the Combine Videos button. This process happens entirely in your browser.',
-          sub6_4_title: '6.4. Voice Studio',
-          sub6_4_p1: 'Convert text to speech.',
-          sub6_4_p2: 'How to Use: Write your script. Choose a Voice Actor, adjust the speed, pitch, and volume. Click Generate Voice Over to produce an MP3 audio file.',
+          sub6_3_title: '6.3. Batch Processor (Admin Only)',
+          sub6_3_p1: 'Generate multiple videos in a single run from a list of prompts.',
+          sub6_3_p2: 'How to Use: Create a text file (.txt) with one video prompt on each line. Upload the file, configure your video settings (model, aspect ratio), and click Start Processing. The system will generate a video for each prompt sequentially.',
+          sub6_4_title: '6.4. Video Combiner (Admin Only)',
+          sub6_4_p1: 'Combine multiple video clips into one.',
+          sub6_4_p2: 'How to Use: Select the videos you have generated (from your Gallery). Click the Combine Videos button. This process happens entirely in your browser.',
+          sub6_5_title: '6.5. Voice Studio',
+          sub6_5_p1: 'Convert text to speech.',
+          sub6_5_p2: 'How to Use: Write your script. Choose a Voice Actor, adjust the speed, pitch, and volume. Click Generate Voice Over to produce an MP3 audio file.',
       },
       
       chapter7: {
@@ -244,12 +247,16 @@ export const translations = {
 
       chapter8: {
           title: 'Chapter 8: Your Assets & Inspiration',
-          sub8_1_title: '8.1. Gallery',
-          sub8_1_p1: 'All content (images, videos, audio, text) you generate will be automatically saved here.',
-          sub8_1_p2: 'Functions: You can review, download, or reuse your assets. For example, click the "Re-edit" icon on an image to take it to `Image Generation` or click the "Create Video" icon to send it to `Video Generation`.',
+          sub8_1_title: '8.1. Gallery & API Log',
+          sub8_1_p1: 'The Gallery is where all content (images, videos, audio, text) you generate is automatically saved. You can review, download, or reuse your assets here. For example, click the "Re-edit" icon on an image to take it to `Image Generation` or click the "Create Video" icon to send it to `Video Generation`.',
+          sub8_1_p2: 'The API Log tab within the Gallery shows a detailed record of every API call you have made, which is useful for checking usage and troubleshooting.',
           sub8_2_title: '8.2. Prompt Library',
-          sub8_2_p1: 'A collection of great prompt examples to give you inspiration.',
-          sub8_2_p2: 'How to Use: Browse the collection. If you find a prompt you like, click Use this Prompt to send it directly to `Image Generation`.'
+          sub8_2_p1: 'This is an inspiration hub with two sections:',
+          sub8_2_ul: [
+              '**Nano-Banana:** A collection of advanced and creative use cases for the `gemini-2.5-flash-image` model, sourced from the official "Awesome Nano Banana" library.',
+              '**Viral MY:** A curated list of trending and viral prompts specifically for the Malaysian market, managed by the admin.'
+          ],
+          sub8_2_p2: 'How to Use: Browse the collections. If you find a prompt you like, click **Use this Prompt** to send it directly to `Image Generation`.'
       },
 
       chapter9: {
@@ -259,13 +266,13 @@ export const translations = {
           sub9_2_title: '9.2. API & Integrations',
           sub9_2_ul: [
               '**API Key:** The place to manage your personal Google Gemini API Key.',
+              '**Veo 3.0 Auth Token:** Instructions on how to get the special authorization token required **only for Veo 3.0 models**.',
+              '**API Health Check:** Run a comprehensive check on all integrated AI services to ensure your API key is configured correctly and operational.',
               '**Personal Webhook:** (For advanced users) Enter a webhook URL (e.g., from n8n or Zapier) to automatically send your generated content to an external service for custom automations.',
               '**Claim Temporary Key:** If your key isn\'t working, use this panel to request and claim a temporary, rate-limited key to continue working.'
           ],
-          sub9_3_title: '9.3. API Log',
-          sub9_3_p1: 'Displays a record of every API call you have made. Useful for checking usage and troubleshooting.',
-          sub9_4_title: '9.4. AI Support',
-          sub9_4_p1: 'A chat space with our AI support agent for any questions or assistance.'
+          sub9_3_title: '9.3. AI Support',
+          sub9_3_p1: 'A chat space with our AI support agent for any questions or assistance.'
       },
       
       chapter10: {
@@ -708,7 +715,7 @@ export const translations = {
         lastUpdated: 'Last Updated',
         latestAnnouncements: 'Latest Announcements',
         postedOn: 'Posted on',
-        gettingStartedTitle: 'Bermula',
+        gettingStartedTitle: 'Hello',
         videoTutorials: 'More Video Tutorials'
     },
     
@@ -875,9 +882,9 @@ export const translations = {
         title: 'Bab 2: Halaman Utama (e-Tutorial)',
         p1: 'Ini adalah halaman pertama yang akan anda lihat selepas log masuk. Ia mengandungi:',
         ul: [
-          'Kemas Kini & Status Platform: Maklumat terkini tentang status sistem dan pengumuman penting.',
-          'Tutorial Permulaan: Video panduan utama untuk mula menggunakan platform.',
-          'Tutorial Video: Koleksi video lain yang menerangkan ciri-ciri khusus.'
+          '**Kemas Kini & Status Platform:** Maklumat terkini tentang status sistem dan pengumuman penting.',
+          '**Tutorial Permulaan:** Video panduan utama untuk mula menggunakan platform.',
+          '**Tutorial Video:** Koleksi video lain yang menerangkan ciri-ciri khusus.'
         ]
       },
 
@@ -903,8 +910,8 @@ export const translations = {
         safetyFilterTitle: 'Nota Penting Mengenai Penapis Keselamatan:',
         safetyFilterP1: 'Google mempunyai sistem penapisan keselamatan AI yang sangat ketat untuk mengelakkan penyalahgunaan.',
         safetyFilterUl: [
-          'Output Mungkin Tiada: Jika anda menggunakan imej wajah (terutamanya wajah sebenar) dan mendapati tiada imej yang dijana (output kosong), kemungkinan besar ia telah disekat oleh penapis keselamatan ini.',
-          'Cara Mengatasi: Jika ini berlaku, jangan risau. Cuba ubah permintaan anda. Anda boleh:',
+          '**Output Mungkin Tiada:** Jika anda menggunakan imej wajah (terutamanya wajah sebenar) dan mendapati tiada imej yang dijana (output kosong), kemungkinan besar ia telah disekat oleh penapis keselamatan ini.',
+          '**Cara Mengatasi:** Jika ini berlaku, jangan risau. Cuba ubah permintaan anda. Anda boleh:',
         ],
         safetyFilterOl: [
             'Ubah Prompt: Gunakan perkataan yang lebih umum dan selamat.',
@@ -937,8 +944,8 @@ export const translations = {
           sub5_1_title: '5.1. Penjana Imej',
           sub5_1_p1: 'Alat utama untuk mencipta imej daripada teks atau menyunting gambar sedia ada.',
           sub5_1_ul: [
-              'Teks-ke-Imej: Biarkan bahagian "Imej Rujukan" kosong. Tulis prompt anda (cth: "seorang angkasawan di bulan, pencahayaan sinematik, hiperrealistik"), pilih nisbah aspek, dan klik Jana.',
-              'Imej-ke-Imej (Menyunting): Muat naik 1-5 imej rujukan. Tulis arahan suntingan dalam medan prompt (cth: "tambahkan topi hari jadi pada orang itu").'
+              '**Teks-ke-Imej:** Biarkan bahagian "Imej Rujukan" kosong. Tulis prompt anda (cth: "seorang angkasawan di bulan, pencahayaan sinematik, hiperrealistik"), pilih nisbah aspek, dan klik Jana.',
+              '**Imej-ke-Imej (Menyunting):** Muat naik 1-5 imej rujukan. Tulis arahan suntingan dalam medan prompt (cth: "tambahkan topi hari jadi pada orang itu").'
           ],
           sub5_2_title: '5.2. Gambar Produk',
           sub5_2_p1: 'Letakkan produk anda dalam latar belakang yang profesional.',
@@ -970,15 +977,18 @@ export const translations = {
           sub6_2_p1: 'Alat canggih untuk merancang video ulasan produk.',
           sub6_2_p2: 'Proses 2-Langkah:',
           sub6_2_ol: [
-              'Jana Papan Cerita: Muat naik imej produk dan gambar wajah model. Isi penerangan produk dan pilih tetapan kreatif. Klik Jana Papan Cerita. AI akan menghasilkan skrip 4-babak.',
-              'Cipta Imej: Selepas papan cerita siap, klik butang Cipta 4 Imej. AI akan menjana satu imej untuk setiap babak dalam papan cerita.'
+              '**Jana Papan Cerita:** Muat naik imej produk dan gambar wajah model. Isi penerangan produk dan pilih tetapan kreatif. Klik Jana Papan Cerita. AI akan menghasilkan skrip 4-babak.',
+              '**Cipta Imej:** Selepas papan cerita siap, klik butang Cipta 4 Imej. AI akan menjana satu imej untuk setiap babak dalam papan cerita.'
           ],
-          sub6_3_title: '6.3. Penggabung Video',
-          sub6_3_p1: 'Gabungkan beberapa klip video menjadi satu.',
-          sub6_3_p2: 'Cara Guna: Pilih video yang telah anda jana (dari Galeri anda). Klik butang Gabung Video. Proses ini berlaku sepenuhnya dalam pelayar anda.',
-          sub6_4_title: '6.4. Studio Suara',
-          sub6_4_p1: 'Tukar teks kepada ucapan.',
-          sub6_4_p2: 'Cara Guna: Tulis skrip anda. Pilih Pelakon Suara, laraskan kelajuan, nada, dan kelantangan. Klik Jana Suara Latar untuk menghasilkan fail audio MP3.',
+          sub6_3_title: '6.3. Pemproses Berkelompok (Admin Sahaja)',
+          sub6_3_p1: 'Jana beberapa video dalam satu proses daripada senarai prompt.',
+          sub6_3_p2: 'Cara Guna: Cipta fail teks (.txt) dengan satu prompt video pada setiap baris. Muat naik fail tersebut, konfigurasikan tetapan video anda (model, nisbah aspek), dan klik Mula Memproses. Sistem akan menjana video untuk setiap prompt secara berurutan.',
+          sub6_4_title: '6.4. Penggabung Video (Admin Sahaja)',
+          sub6_4_p1: 'Gabungkan beberapa klip video menjadi satu.',
+          sub6_4_p2: 'Cara Guna: Pilih video yang telah anda jana (dari Galeri anda). Klik butang Gabung Video. Proses ini berlaku sepenuhnya dalam pelayar anda.',
+          sub6_5_title: '6.5. Studio Suara',
+          sub6_5_p1: 'Tukar teks kepada ucapan.',
+          sub6_5_p2: 'Cara Guna: Tulis skrip anda. Pilih Pelakon Suara, laraskan kelajuan, nada, dan kelantangan. Klik Jana Suara Latar untuk menghasilkan fail audio MP3.',
       },
       
       chapter7: {
@@ -999,12 +1009,16 @@ export const translations = {
 
       chapter8: {
           title: 'Bab 8: Aset & Inspirasi Anda',
-          sub8_1_title: '8.1. Galeri',
-          sub8_1_p1: 'Semua kandungan (imej, video, audio, teks) yang anda jana akan disimpan secara automatik di sini.',
-          sub8_1_p2: 'Fungsi: Anda boleh menyemak, memuat turun, atau menggunakan semula aset anda. Contohnya, klik ikon "Sunting Semula" pada imej untuk membawanya ke `Penjana Imej` atau klik ikon "Cipta Video" untuk menghantarnya ke `Penjana Video`.',
+          sub8_1_title: '8.1. Galeri & Log API',
+          sub8_1_p1: 'Galeri ialah tempat semua kandungan (imej, video, audio, teks) yang anda jana disimpan secara automatik. Anda boleh menyemak, memuat turun atau menggunakan semula aset anda di sini. Contohnya, klik ikon "Sunting Semula" pada imej untuk membawanya ke `Penjana Imej` atau klik ikon "Cipta Video" untuk menghantarnya ke `Penjana Video`.',
+          sub8_1_p2: 'Tab Log API di dalam Galeri menunjukkan rekod terperinci setiap panggilan API yang telah anda buat, yang berguna untuk memeriksa penggunaan dan menyelesaikan masalah.',
           sub8_2_title: '8.2. Koleksi Prompt',
-          sub8_2_p1: 'Koleksi contoh prompt hebat untuk memberi anda inspirasi.',
-          sub8_2_p2: 'Cara Guna: Semak imbas koleksi. Jika anda menemui prompt yang anda suka, klik Guna Prompt Ini untuk menghantarnya terus ke `Penjana Imej`.'
+          sub8_2_p1: 'Ini ialah hab inspirasi dengan dua bahagian:',
+          sub8_2_ul: [
+              '**Nano-Banana:** Koleksi kes penggunaan lanjutan dan kreatif untuk model `gemini-2.5-flash-image`, yang bersumber daripada pustaka rasmi "Awesome Nano Banana".',
+              '**Viral MY:** Senarai susun atur prompt yang sedang tren dan viral khusus untuk pasaran Malaysia, yang diuruskan oleh admin.'
+          ],
+          sub8_2_p2: 'Cara Guna: Semak imbas koleksi. Jika anda menemui prompt yang anda suka, klik **Guna Prompt Ini** untuk menghantarnya terus ke `Penjana Imej`.'
       },
 
       chapter9: {
@@ -1014,13 +1028,13 @@ export const translations = {
           sub9_2_title: '9.2. API & Integrasi',
           sub9_2_ul: [
               '**Kunci API:** Tempat untuk mengurus Kunci API Google Gemini peribadi anda.',
-              '**Webhook Peribadi:** (Untuk pengguna lanjutan) Masukkan URL webhook (cth: dari n8n atau Zapier) untuk menghantar semua kandungan yang anda jana secara automatik ke perkhidmatan luaran untuk automasi tersuai.',
+              '**Token Auth Veo 3.0:** Arahan tentang cara mendapatkan token kebenaran khas yang diperlukan **hanya untuk model Veo 3.0**.',
+              '**Pemeriksaan Kesihatan API:** Jalankan pemeriksaan menyeluruh pada semua perkhidmatan AI yang disepadukan untuk memastikan kunci API anda dikonfigurasikan dengan betul dan beroperasi.',
+              '**Webhook Peribadi:** (Untuk pengguna lanjutan) Masukkan URL webhook (cth., dari n8n atau Zapier) untuk menghantar kandungan yang anda jana secara automatik ke perkhidmatan luaran untuk automasi tersuai.',
               '**Tuntut Kunci Sementara:** Jika kunci anda tidak berfungsi, gunakan panel ini untuk meminta dan menuntut kunci sementara dengan had kadar untuk terus bekerja.'
           ],
-          sub9_3_title: '9.3. Log API',
-          sub9_3_p1: 'Memaparkan rekod setiap panggilan API yang telah anda buat. Berguna untuk memeriksa penggunaan dan menyelesaikan masalah.',
-          sub9_4_title: '9.4. Sokongan AI',
-          sub9_4_p1: 'Ruang sembang dengan ejen sokongan AI kami untuk sebarang pertanyaan atau bantuan.'
+          sub9_3_title: '9.3. Sokongan AI',
+          sub9_3_p1: 'Ruang sembang dengan ejen sokongan AI kami untuk sebarang pertanyaan atau bantuan.'
       },
       
       chapter10: {

@@ -80,7 +80,7 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                 <Section title={T.chapter2.title}>
                     <p>{T.chapter2.p1}</p>
                      <ul className="list-disc pl-5 space-y-2">
-                        {T.chapter2.ul.map((item, i) => <li key={i}><strong className="font-semibold">{item.split(':')[0]}:</strong>{item.split(':').slice(1).join(':')}</li>)}
+                        {T.chapter2.ul.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/([^:]+):/, '<strong class="font-semibold">$1:</strong>') }}/>)}
                     </ul>
                 </Section>
                 
@@ -109,12 +109,10 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                      <SubSection title={T.chapter3.safetyFilterTitle}>
                         <p>{T.chapter3.safetyFilterP1}</p>
                          <ul className="list-disc pl-5 space-y-2">
-                            <li><strong className="font-semibold">{T.chapter3.safetyFilterUl[0].split(':')[0]}:</strong>{T.chapter3.safetyFilterUl[0].split(':').slice(1).join(':')}</li>
-                            <li><strong className="font-semibold">{T.chapter3.safetyFilterUl[1].split(':')[0]}:</strong>{T.chapter3.safetyFilterUl[1].split(':').slice(1).join(':')}
-                                <ol className="list-decimal pl-5 mt-1">
-                                    {T.chapter3.safetyFilterOl.map((item, i) => <li key={i}>{item}</li>)}
-                                </ol>
-                            </li>
+                            {T.chapter3.safetyFilterUl.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/([^:]+):/, '<strong class="font-semibold">$1:</strong>') }} />)}
+                            <ol className="list-decimal pl-5 mt-1">
+                                {T.chapter3.safetyFilterOl.map((item, i) => <li key={i}>{item}</li>)}
+                            </ol>
                         </ul>
                         <p>{T.chapter3.safetyFilterConclusion}</p>
                     </SubSection>
@@ -133,7 +131,7 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                     <SubSection title={T.chapter5.sub5_1_title}>
                         <p>{T.chapter5.sub5_1_p1}</p>
                         <ul className="list-disc pl-5 space-y-1">
-                            {T.chapter5.sub5_1_ul.map((item, i) => <li key={i}><strong className="font-semibold">{item.split(':')[0]}:</strong>{item.split(':').slice(1).join(':')}</li>)}
+                            {T.chapter5.sub5_1_ul.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/`([^`]+)`/g, '<code class="text-sm font-mono bg-neutral-200 dark:bg-neutral-700 p-1 rounded">$1</code>') }} />)}
                         </ul>
                     </SubSection>
                     <SubSection title={T.chapter5.sub5_2_title}><p>{T.chapter5.sub5_2_p1}</p><p>{T.chapter5.sub5_2_p2}</p></SubSection>
@@ -151,11 +149,12 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                     <SubSection title={T.chapter6.sub6_2_title}>
                         <p>{T.chapter6.sub6_2_p1}</p><p className="font-semibold">{T.chapter6.sub6_2_p2}</p>
                         <ol className="list-decimal pl-5 space-y-1">
-                            {T.chapter6.sub6_2_ol.map((item, i) => <li key={i}><strong className="font-semibold">{item.split(':')[0]}:</strong>{item.split(':').slice(1).join(':')}</li>)}
+                            {T.chapter6.sub6_2_ol.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/`([^`]+)`/g, '<code class="text-sm font-mono bg-neutral-200 dark:bg-neutral-700 p-1 rounded">$1</code>') }} />)}
                         </ol>
                     </SubSection>
                     <SubSection title={T.chapter6.sub6_3_title}><p>{T.chapter6.sub6_3_p1}</p><p>{T.chapter6.sub6_3_p2}</p></SubSection>
                     <SubSection title={T.chapter6.sub6_4_title}><p>{T.chapter6.sub6_4_p1}</p><p>{T.chapter6.sub6_4_p2}</p></SubSection>
+                    <SubSection title={T.chapter6.sub6_5_title}><p>{T.chapter6.sub6_5_p1}</p><p>{T.chapter6.sub6_5_p2}</p></SubSection>
                 </Section>
 
                 <Section title={T.chapter7.title}>
@@ -168,19 +167,27 @@ const GetStartedView: React.FC<GetStartedViewProps> = ({ language }) => {
                 </Section>
                 
                 <Section title={T.chapter8.title}>
-                    <SubSection title={T.chapter8.sub8_1_title}><p>{T.chapter8.sub8_1_p1}</p><p>{T.chapter8.sub8_1_p2}</p></SubSection>
-                    <SubSection title={T.chapter8.sub8_2_title}><p>{T.chapter8.sub8_2_p1}</p><p>{T.chapter8.sub8_2_p2}</p></SubSection>
+                    <SubSection title={T.chapter8.sub8_1_title}>
+                        <p>{T.chapter8.sub8_1_p1}</p>
+                        <p>{T.chapter8.sub8_1_p2}</p>
+                    </SubSection>
+                    <SubSection title={T.chapter8.sub8_2_title}>
+                        <p>{T.chapter8.sub8_2_p1}</p>
+                         <ul className="list-disc pl-5 space-y-1">
+                            {T.chapter8.sub8_2_ul.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/`([^`]+)`/g, '<code class="text-sm font-mono bg-neutral-200 dark:bg-neutral-700 p-1 rounded">$1</code>') }}/>)}
+                        </ul>
+                        <p className="mt-2">{T.chapter8.sub8_2_p2}</p>
+                    </SubSection>
                 </Section>
                 
                 <Section title={T.chapter9.title}>
                     <SubSection title={T.chapter9.sub9_1_title}><p>{T.chapter9.sub9_1_p1}</p></SubSection>
                     <SubSection title={T.chapter9.sub9_2_title}>
                         <ul className="list-disc pl-5 space-y-1">
-                            {T.chapter9.sub9_2_ul.map((item, i) => <li key={i}><strong className="font-semibold">{item.split(':')[0]}:</strong>{item.split(':').slice(1).join(':')}</li>)}
+                            {T.chapter9.sub9_2_ul.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: item.replace(/`([^`]+)`/g, '<code class="text-sm font-mono bg-neutral-200 dark:bg-neutral-700 p-1 rounded">$1</code>') }} />)}
                         </ul>
                     </SubSection>
                     <SubSection title={T.chapter9.sub9_3_title}><p>{T.chapter9.sub9_3_p1}</p></SubSection>
-                    <SubSection title={T.chapter9.sub9_4_title}><p>{T.chapter9.sub9_4_p1}</p></SubSection>
                 </Section>
 
                 <Section title={T.chapter10.title}>
