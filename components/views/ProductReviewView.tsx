@@ -167,7 +167,9 @@ const ProductReviewView: React.FC<ProductReviewViewProps> = ({ onReEdit, onCreat
   useEffect(() => {
     return () => {
         generatedVideos.forEach(url => {
-            if (url) URL.revokeObjectURL(url);
+            if (url && url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+            }
         });
     };
   }, [generatedVideos]);
@@ -393,15 +395,6 @@ const runVideoGeneration = async (index: number) => {
         }
       }
       
-      // ✅ ADD BACK: Debug logs
-      console.log('🎬 ===== PRODUCT REVIEW VIDEO GENERATION =====');
-      console.log(`Scene: ${index + 1}`);
-      console.log(`Model: ${videoModel}`);
-      console.log(`Aspect Ratio: ${videoAspectRatio}`);
-      console.log(`Resolution: ${videoResolution}`);
-      console.log(`Prompt: ${parsedScenes[index].substring(0, 100)}...`);
-      console.log('================================================');
-      
       const imagePayload = { 
         imageBytes: generatedImages[index]!, 
         mimeType: 'image/png' 
@@ -410,7 +403,6 @@ const runVideoGeneration = async (index: number) => {
       const videoPrompt = parsedScenes[index];
       const tokenToUse = authToken || sessionStorage.getItem('veoAuthToken') || '';
       
-      // ✅ Call generateVideo
       const videoFile = await generateVideo(
         videoPrompt,
         videoModel,
@@ -421,55 +413,35 @@ const runVideoGeneration = async (index: number) => {
         tokenToUse
       );
       
-      // ✅ ADD BACK: Verify File object with logs
-      console.log('📦 Video File received:', {
-        name: videoFile.name,
-        size: videoFile.size,
-        type: videoFile.type,
-        isFile: videoFile instanceof File,
-        isBlob: videoFile instanceof Blob
-      });
-      
       if (!((videoFile as unknown) instanceof Blob)) {
         throw new Error('generateVideo did not return a valid File/Blob object');
       }
       
-      // ✅ Create blob URL
       const url = URL.createObjectURL(videoFile);
-      
-      // ✅ ADD BACK: Verify URL with logs
-      console.log('🔗 Blob URL created:', url);
-      console.log('🔗 URL length:', url.length);
-      console.log('🔗 URL valid:', url.startsWith('blob:'));
       
       if (!url || !url.startsWith('blob:')) {
         if (url) URL.revokeObjectURL(url);
         throw new Error('Failed to create valid blob URL from video file.');
       }
       
-      // ✅ Update states
       setGeneratedVideos(prev => {
         const next = [...prev];
-        if(next[index]) {
-          console.log(`🗑️ Revoking old URL for scene ${index + 1}`);
+        if(next[index] && next[index]!.startsWith('blob:')) {
           URL.revokeObjectURL(next[index]!);
         }
         next[index] = url;
-        console.log(`✅ Set generatedVideos[${index}] =`, url.substring(0, 50) + '...');
         return next;
       });
       
       setVideoFilenames(prev => {
         const next = [...prev];
         next[index] = videoFile.name;
-        console.log(`✅ Set videoFilenames[${index}] =`, videoFile.name);
         return next;
       });
       
       setVideoGenerationStatus(prev => { 
         const next = [...prev]; 
         next[index] = 'success'; 
-        console.log(`✅ Set status[${index}] = success`);
         return next; 
       });
       
@@ -479,17 +451,9 @@ const runVideoGeneration = async (index: number) => {
         result: videoFile 
       });
       
-      // ✅ ADD BACK: Final success log
-      console.log(`✅ Scene ${index + 1} video generated successfully`);
-      console.log(`📁 Filename: ${videoFile.name}`);
-      console.log(`🔗 Full Blob URL: ${url}`);
-      console.log('================================================\n');
-      
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
       console.error(`❌ Scene ${index + 1} video generation failed:`, errorMessage);
-      console.error('Full error:', e);
-      console.error('================================================\n');
       
       setVideoGenerationStatus(prev => { 
         const next = [...prev]; 
@@ -878,6 +842,7 @@ const runVideoGeneration = async (index: number) => {
                                 ) : videoGenerationStatus[index] === 'success' && generatedVideos[index] ? (
                                     <>
                                         <video 
+                                            key={generatedVideos[index]!}
                                             src={generatedVideos[index]!} 
                                             controls 
                                             className="w-full h-full object-cover"

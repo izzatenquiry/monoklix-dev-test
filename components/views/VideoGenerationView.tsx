@@ -38,23 +38,6 @@ const Section: React.FC<{ title: string, children: React.ReactNode }> = ({ title
     <div><h2 className="text-lg font-semibold mb-2">{title}</h2>{children}</div>
 );
 
-// Helper function to convert a Blob to a Data URL
-const blobToDataURL = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            if (typeof reader.result === 'string') {
-                resolve(reader.result);
-            } else {
-                reject(new Error('Failed to read blob as Data URL.'));
-            }
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-};
-
-
 const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clearPreset, language }) => {
   const [subjectContext, setSubjectContext] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
@@ -156,7 +139,7 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
       }
   }, [preset, clearPreset]);
 
-  // Cleanup blob URLs to prevent memory leaks, but not data URLs
+  // Cleanup blob URLs to prevent memory leaks
   useEffect(() => {
       const urlToClean = videoUrl;
       return () => {
@@ -189,8 +172,6 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
 
       setIsLoading(true);
       setError(null);
-      
-      // The useEffect hook will handle cleaning up the old URL.
       setVideoUrl(null);
       setVideoFilename(null);
 
@@ -227,18 +208,17 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
             throw new Error('generateVideo did not return a valid File/Blob object');
           }
           
-          // ALTERNATIVE: Use Data URL instead of Blob URL for robustness
-          const dataUrl = await blobToDataURL(videoFile);
+          const blobUrl = URL.createObjectURL(videoFile);
           
-          console.log('✅ Video Data URL created and set in state.');
+          console.log('✅ Video Blob URL created and set in state:', blobUrl);
           
-          setVideoUrl(dataUrl);
+          setVideoUrl(blobUrl);
           setVideoFilename(videoFile.name);
           
           await addHistoryItem({
               type: 'Video',
               prompt: `Video: ${fullPrompt}`,
-              result: videoFile, // Still save the more efficient Blob to history
+              result: videoFile,
           });
           
       } catch (e) {
@@ -267,7 +247,6 @@ const VideoGenerationView: React.FC<VideoGenerationViewProps> = ({ preset, clear
     setDialogueAudio('');
     setBackgroundVibe('Random');
     
-    // The useEffect hook will handle cleanup of the old URL
     setVideoUrl(null);
     setVideoFilename(null);
     setError(null);
