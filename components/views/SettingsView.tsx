@@ -272,6 +272,15 @@ const ApiIntegrationsPanel: React.FC<ApiIntegrationsPanelProps> = ({ currentUser
 
     const [isCheckingHealth, setIsCheckingHealth] = useState(false);
     const [healthCheckResults, setHealthCheckResults] = useState<HealthCheckResult[] | null>(null);
+    const [veoToken, setVeoToken] = useState<string | null>(null);
+    const [veoTokenCreatedAt, setVeoTokenCreatedAt] = useState<string | null>(null);
+
+    useEffect(() => {
+        const token = sessionStorage.getItem('veoAuthToken');
+        const createdAt = sessionStorage.getItem('veoAuthTokenCreatedAt');
+        setVeoToken(token);
+        setVeoTokenCreatedAt(createdAt);
+    }, []);
     
 
     const handleSaveApiKey = async () => {
@@ -338,6 +347,8 @@ const ApiIntegrationsPanel: React.FC<ApiIntegrationsPanelProps> = ({ currentUser
             default: return { border: 'border-neutral-500', icon: null, text: '' };
         }
     };
+    
+    const locale = language === 'ms' ? 'ms-MY' : 'en-US';
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -376,12 +387,23 @@ const ApiIntegrationsPanel: React.FC<ApiIntegrationsPanelProps> = ({ currentUser
                             <li>Go to `Application` &gt; `Storage` &gt; `Cookies`.</li>
                             <li>Find the cookie named `__SESSION` and copy its entire "Cookie Value".</li>
                         </ol>
-                        <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-2 border border-green-200 dark:border-green-800">
-                            <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                            <p className="text-sm font-semibold text-green-800 dark:text-green-200">
-                                Authorization Token is configured and ready.
-                            </p>
-                        </div>
+                        {veoToken ? (
+                            <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-2 border border-green-200 dark:border-green-800">
+                                <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+                                    {veoTokenCreatedAt
+                                        ? `Authorization Token is configured. Created: ${new Date(veoTokenCreatedAt).toLocaleString(locale)}`
+                                        : 'Authorization Token is configured and ready.'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-md flex items-center gap-2 border border-yellow-200 dark:border-yellow-800">
+                                <AlertTriangleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                                <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                                    Authorization Token not found. Veo 3.0 models will fail.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

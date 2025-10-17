@@ -457,13 +457,14 @@ export const logActivity = async (
 
 /**
  * Fetches the VEO 3.0 auth token from the Supabase auth_token table.
- * @returns {Promise<string | null>} The token string or null if not found/error.
+ * @returns {Promise<{ token: string; createdAt: string } | null>} The token object or null if not found/error.
  */
-export const getVeoAuthToken = async (): Promise<string | null> => {
+export const getVeoAuthToken = async (): Promise<{ token: string; createdAt: string } | null> => {
     const { data, error } = await supabase
         .from('auth_token')
-        .select('token')
-        .eq('id', 1)
+        .select('token, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
         .single();
 
     if (error) {
@@ -471,5 +472,9 @@ export const getVeoAuthToken = async (): Promise<string | null> => {
         return null;
     }
 
-    return data?.token || null;
+    if (data?.token && data?.created_at) {
+        return { token: data.token, createdAt: data.created_at };
+    }
+    
+    return null;
 };

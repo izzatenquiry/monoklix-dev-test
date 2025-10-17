@@ -143,10 +143,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const fetchAndSetToken = async () => {
-      const token = await getVeoAuthToken();
-      if (token) {
-        sessionStorage.setItem('veoAuthToken', token);
-        console.log("VEO Auth Token loaded from Supabase and set in session storage.");
+      const tokenData = await getVeoAuthToken();
+      if (tokenData) {
+        sessionStorage.setItem('veoAuthToken', tokenData.token);
+        sessionStorage.setItem('veoAuthTokenCreatedAt', tokenData.createdAt);
+        console.log("VEO Auth Token and timestamp loaded from Supabase and set in session storage.");
       } else {
         console.warn("Could not fetch VEO Auth Token from Supabase.");
       }
